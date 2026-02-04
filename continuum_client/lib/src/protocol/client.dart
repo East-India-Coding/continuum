@@ -16,8 +16,12 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:continuum_client/src/protocol/greetings/greeting.dart' as _i5;
-import 'protocol.dart' as _i6;
+import 'package:continuum_client/src/protocol/speaker.dart' as _i5;
+import 'package:continuum_client/src/protocol/graph_data.dart' as _i6;
+import 'package:continuum_client/src/protocol/graph_node.dart' as _i7;
+import 'package:continuum_client/src/protocol/ingestion_job.dart' as _i8;
+import 'package:continuum_client/src/protocol/podcast.dart' as _i9;
+import 'protocol.dart' as _i10;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -195,6 +199,31 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   );
 }
 
+/// {@category Endpoint}
+class EndpointGoogleIdp extends _i1.EndpointGoogleIdpBase {
+  EndpointGoogleIdp(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'googleIdp';
+
+  /// Validates a Google ID token and either logs in the associated user or
+  /// creates a new user account if the Google account ID is not yet known.
+  ///
+  /// If a new user is created an associated [UserProfile] is also created.
+  @override
+  _i3.Future<_i4.AuthSuccess> login({
+    required String idToken,
+    required String? accessToken,
+  }) => caller.callServerEndpoint<_i4.AuthSuccess>(
+    'googleIdp',
+    'login',
+    {
+      'idToken': idToken,
+      'accessToken': accessToken,
+    },
+  );
+}
+
 /// By extending [RefreshJwtTokensEndpoint], the JWT token refresh endpoint
 /// is made available on the server and enables automatic token refresh on the client.
 /// {@category Endpoint}
@@ -233,21 +262,101 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
-/// This is an example endpoint that returns a greeting message through
-/// its [hello] method.
 /// {@category Endpoint}
-class EndpointGreeting extends _i2.EndpointRef {
-  EndpointGreeting(_i2.EndpointCaller caller) : super(caller);
+class EndpointConversation extends _i2.EndpointRef {
+  EndpointConversation(_i2.EndpointCaller caller) : super(caller);
 
   @override
-  String get name => 'greeting';
+  String get name => 'conversation';
 
-  /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
-        'greeting',
-        'hello',
-        {'name': name},
+  /// Answers questions using stored knowledge graph and speaker perspective
+  _i3.Stream<String> askQuestion(
+    String question,
+    _i5.Speaker speaker, {
+    required bool isDemo,
+  }) => caller.callStreamingServerEndpoint<_i3.Stream<String>, String>(
+    'conversation',
+    'askQuestion',
+    {
+      'question': question,
+      'speaker': speaker,
+      'isDemo': isDemo,
+    },
+    {},
+  );
+
+  _i3.Future<List<_i5.Speaker>> listSpeakers({required bool isDemo}) =>
+      caller.callServerEndpoint<List<_i5.Speaker>>(
+        'conversation',
+        'listSpeakers',
+        {'isDemo': isDemo},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointGraph extends _i2.EndpointRef {
+  EndpointGraph(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'graph';
+
+  _i3.Future<_i6.GraphData> getGraphData({required bool isDemo}) =>
+      caller.callServerEndpoint<_i6.GraphData>(
+        'graph',
+        'getGraphData',
+        {'isDemo': isDemo},
+      );
+
+  _i3.Future<void> bookmarkNode(
+    int nodeId,
+    bool isBookmarked,
+  ) => caller.callServerEndpoint<void>(
+    'graph',
+    'bookmarkNode',
+    {
+      'nodeId': nodeId,
+      'isBookmarked': isBookmarked,
+    },
+  );
+
+  _i3.Future<List<_i7.GraphNode>> getBookmarkedNodes() =>
+      caller.callServerEndpoint<List<_i7.GraphNode>>(
+        'graph',
+        'getBookmarkedNodes',
+        {},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointPodcast extends _i2.EndpointRef {
+  EndpointPodcast(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'podcast';
+
+  _i3.Future<_i8.IngestionJob> ingestPodcast(String youtubeUrl) =>
+      caller.callServerEndpoint<_i8.IngestionJob>(
+        'podcast',
+        'ingestPodcast',
+        {'youtubeUrl': youtubeUrl},
+      );
+
+  _i3.Stream<_i8.IngestionJob> getJobStatus(int jobId) =>
+      caller.callStreamingServerEndpoint<
+        _i3.Stream<_i8.IngestionJob>,
+        _i8.IngestionJob
+      >(
+        'podcast',
+        'getJobStatus',
+        {'jobId': jobId},
+        {},
+      );
+
+  _i3.Future<List<_i9.Podcast>> listPodcasts() =>
+      caller.callServerEndpoint<List<_i9.Podcast>>(
+        'podcast',
+        'listPodcasts',
+        {},
       );
 }
 
@@ -282,7 +391,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i6.Protocol(),
+         _i10.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -292,24 +401,36 @@ class Client extends _i2.ServerpodClientShared {
              disconnectStreamsOnLostInternetConnection,
        ) {
     emailIdp = EndpointEmailIdp(this);
+    googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
-    greeting = EndpointGreeting(this);
+    conversation = EndpointConversation(this);
+    graph = EndpointGraph(this);
+    podcast = EndpointPodcast(this);
     modules = Modules(this);
   }
 
   late final EndpointEmailIdp emailIdp;
 
+  late final EndpointGoogleIdp googleIdp;
+
   late final EndpointJwtRefresh jwtRefresh;
 
-  late final EndpointGreeting greeting;
+  late final EndpointConversation conversation;
+
+  late final EndpointGraph graph;
+
+  late final EndpointPodcast podcast;
 
   late final Modules modules;
 
   @override
   Map<String, _i2.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
+    'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
-    'greeting': greeting,
+    'conversation': conversation,
+    'graph': graph,
+    'podcast': podcast,
   };
 
   @override

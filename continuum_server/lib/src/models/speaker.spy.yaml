@@ -1,0 +1,13 @@
+class: Speaker
+table: speaker
+fields:
+  userId: String
+  name: String
+  normalizedName: String # Lowercase, trimmed
+  detectedCount: int
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  speaker_idx:
+    fields: userId, normalizedName
+    unique: true

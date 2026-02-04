@@ -1,0 +1,5 @@
+class: QuoteReference
+fields:
+  startTime: int
+  endTime: int
+  verbatimQuote: String

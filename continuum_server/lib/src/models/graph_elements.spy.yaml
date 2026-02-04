@@ -1,0 +1,5 @@
+class: GraphElements
+fields:
+  categories: List<GraphCategory>
+  nodes: List<GraphNodeDisplay>
+  links: List<GraphLinkDisplay>

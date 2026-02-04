@@ -1,0 +1,3 @@
+class: GraphData
+fields:
+  graphWithGranularity: List<GraphGranularity>

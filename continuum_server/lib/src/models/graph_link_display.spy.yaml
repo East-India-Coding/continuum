@@ -1,0 +1,4 @@
+class: GraphLinkDisplay
+fields:
+  source: int
+  target: int

@@ -1,0 +1,17 @@
+class: GraphNode
+table: graph_node
+fields:
+  userId: String
+  videoId: String
+  label: String
+  impactScore: double
+  summary: String
+  primarySpeakerId: int
+  references: List<QuoteReference>
+  embedding: Vector(768)
+  isBookmarked: bool, default=false
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  graph_node_idx:
+    fields: userId, videoId, primarySpeakerId

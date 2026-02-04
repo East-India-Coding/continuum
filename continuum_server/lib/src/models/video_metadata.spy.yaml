@@ -1,0 +1,8 @@
+class: VideoMetadata
+
+fields:
+  youtubeUrl: String
+  videoId: String
+  title: String?
+  channelName: String?
+  thumbnailUrl: String?

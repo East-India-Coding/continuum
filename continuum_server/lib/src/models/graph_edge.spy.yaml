@@ -1,0 +1,7 @@
+class: GraphEdge
+table: graph_edge
+fields:
+  userId: String
+  sourceNodeId: int
+  targetNodeId: int
+  weight: double

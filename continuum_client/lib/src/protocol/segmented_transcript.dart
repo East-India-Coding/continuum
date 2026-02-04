@@ -1,0 +1,101 @@
+/* AUTOMATICALLY GENERATED CODE DO NOT MODIFY */
+/*   To generate run: "serverpod generate"    */
+
+// ignore_for_file: implementation_imports
+// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: public_member_api_docs
+// ignore_for_file: type_literal_in_constant_pattern
+// ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'transcript_topic.dart' as _i2;
+import 'package:continuum_client/src/protocol/protocol.dart' as _i3;
+
+abstract class SegmentedTranscript implements _i1.SerializableModel {
+  SegmentedTranscript._({
+    this.id,
+    this.videoId,
+    required this.ideas,
+  });
+
+  factory SegmentedTranscript({
+    int? id,
+    String? videoId,
+    required List<_i2.TranscriptTopic> ideas,
+  }) = _SegmentedTranscriptImpl;
+
+  factory SegmentedTranscript.fromJson(Map<String, dynamic> jsonSerialization) {
+    return SegmentedTranscript(
+      id: jsonSerialization['id'] as int?,
+      videoId: jsonSerialization['videoId'] as String?,
+      ideas: _i3.Protocol().deserialize<List<_i2.TranscriptTopic>>(
+        jsonSerialization['ideas'],
+      ),
+    );
+  }
+
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  int? id;
+
+  String? videoId;
+
+  List<_i2.TranscriptTopic> ideas;
+
+  /// Returns a shallow copy of this [SegmentedTranscript]
+  /// with some or all fields replaced by the given arguments.
+  @_i1.useResult
+  SegmentedTranscript copyWith({
+    int? id,
+    String? videoId,
+    List<_i2.TranscriptTopic>? ideas,
+  });
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      '__className__': 'SegmentedTranscript',
+      if (id != null) 'id': id,
+      if (videoId != null) 'videoId': videoId,
+      'ideas': ideas.toJson(valueToJson: (v) => v.toJson()),
+    };
+  }
+
+  @override
+  String toString() {
+    return _i1.SerializationManager.encode(this);
+  }
+}
+
+class _Undefined {}
+
+class _SegmentedTranscriptImpl extends SegmentedTranscript {
+  _SegmentedTranscriptImpl({
+    int? id,
+    String? videoId,
+    required List<_i2.TranscriptTopic> ideas,
+  }) : super._(
+         id: id,
+         videoId: videoId,
+         ideas: ideas,
+       );
+
+  /// Returns a shallow copy of this [SegmentedTranscript]
+  /// with some or all fields replaced by the given arguments.
+  @_i1.useResult
+  @override
+  SegmentedTranscript copyWith({
+    Object? id = _Undefined,
+    Object? videoId = _Undefined,
+    List<_i2.TranscriptTopic>? ideas,
+  }) {
+    return SegmentedTranscript(
+      id: id is int? ? id : this.id,
+      videoId: videoId is String? ? videoId : this.videoId,
+      ideas: ideas ?? this.ideas.map((e0) => e0.copyWith()).toList(),
+    );
+  }
+}

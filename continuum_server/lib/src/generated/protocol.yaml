@@ -6,7 +6,18 @@ emailIdp:
   - startPasswordReset:
   - verifyPasswordResetCode:
   - finishPasswordReset:
+googleIdp:
+  - login:
 jwtRefresh:
   - refreshAccessToken:
-greeting:
-  - hello:
+conversation:
+  - askQuestion:
+  - listSpeakers:
+graph:
+  - getGraphData:
+  - bookmarkNode:
+  - getBookmarkedNodes:
+podcast:
+  - ingestPodcast:
+  - getJobStatus:
+  - listPodcasts:

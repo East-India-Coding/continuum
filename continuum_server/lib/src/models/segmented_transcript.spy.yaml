@@ -1,0 +1,5 @@
+class: SegmentedTranscript
+table: segmented_transcript
+fields:
+  videoId: String?
+  ideas: List<TranscriptTopic>

@@ -1,0 +1,3 @@
+class: GraphCategory
+fields:
+  name: String

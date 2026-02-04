@@ -16,7 +16,15 @@ import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
-import 'package:continuum_server/src/generated/greetings/greeting.dart' as _i5;
+import 'package:continuum_server/src/generated/speaker.dart' as _i5;
+import 'dart:convert' as _i6;
+import 'package:continuum_server/src/generated/graph_data.dart' as _i7;
+import 'package:continuum_server/src/generated/graph_node.dart' as _i8;
+import 'package:continuum_server/src/generated/ingestion_job.dart' as _i9;
+import 'package:continuum_server/src/generated/podcast.dart' as _i10;
+import 'package:continuum_server/src/generated/process_podcast_params.dart'
+    as _i11;
+import 'package:continuum_server/src/generated/future_calls.dart' as _i12;
 import 'package:continuum_server/src/generated/protocol.dart';
 import 'package:continuum_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -124,11 +132,19 @@ void withServerpod(
 }
 
 class TestEndpoints {
+  late final futureCalls = _FutureCalls();
+
   late final _EmailIdpEndpoint emailIdp;
+
+  late final _GoogleIdpEndpoint googleIdp;
 
   late final _JwtRefreshEndpoint jwtRefresh;
 
-  late final _GreetingEndpoint greeting;
+  late final _ConversationEndpoint conversation;
+
+  late final _GraphEndpoint graph;
+
+  late final _PodcastEndpoint podcast;
 }
 
 class _InternalTestEndpoints extends TestEndpoints
@@ -142,15 +158,31 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
+    googleIdp = _GoogleIdpEndpoint(
+      endpoints,
+      serializationManager,
+    );
     jwtRefresh = _JwtRefreshEndpoint(
       endpoints,
       serializationManager,
     );
-    greeting = _GreetingEndpoint(
+    conversation = _ConversationEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    graph = _GraphEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    podcast = _PodcastEndpoint(
       endpoints,
       serializationManager,
     );
   }
+}
+
+class _FutureCalls {
+  late final processPodcastCall = _ProcessPodcastCallFutureCall();
 }
 
 class _EmailIdpEndpoint {
@@ -401,6 +433,52 @@ class _EmailIdpEndpoint {
   }
 }
 
+class _GoogleIdpEndpoint {
+  _GoogleIdpEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i4.AuthSuccess> login(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String idToken,
+    required String? accessToken,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'googleIdp',
+            method: 'login',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'googleIdp',
+          methodName: 'login',
+          parameters: _i1.testObjectToJson({
+            'idToken': idToken,
+            'accessToken': accessToken,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i4.AuthSuccess>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _JwtRefreshEndpoint {
   _JwtRefreshEndpoint(
     this._endpointDispatch,
@@ -443,8 +521,8 @@ class _JwtRefreshEndpoint {
   }
 }
 
-class _GreetingEndpoint {
-  _GreetingEndpoint(
+class _ConversationEndpoint {
+  _ConversationEndpoint(
     this._endpointDispatch,
     this._serializationManager,
   );
@@ -453,22 +531,62 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i5.Greeting> hello(
+  _i3.Stream<String> askQuestion(
     _i1.TestSessionBuilder sessionBuilder,
-    String name,
-  ) async {
+    String question,
+    _i5.Speaker speaker, {
+    required bool isDemo,
+  }) {
+    var _localTestStreamManager = _i1.TestStreamManager<String>();
+    _i1.callStreamFunctionAndHandleExceptions(
+      () async {
+        var _localUniqueSession =
+            (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+              endpoint: 'conversation',
+              method: 'askQuestion',
+            );
+        var _localCallContext = await _endpointDispatch
+            .getMethodStreamCallContext(
+              createSessionCallback: (_) => _localUniqueSession,
+              endpointPath: 'conversation',
+              methodName: 'askQuestion',
+              arguments: {
+                'question': question,
+                'speaker': _i6.jsonDecode(
+                  _i2.SerializationManager.encode(speaker),
+                ),
+                'isDemo': isDemo,
+              },
+              requestedInputStreams: [],
+              serializationManager: _serializationManager,
+            );
+        await _localTestStreamManager.callStreamMethod(
+          _localCallContext,
+          _localUniqueSession,
+          {},
+        );
+      },
+      _localTestStreamManager.outputStreamController,
+    );
+    return _localTestStreamManager.outputStreamController.stream;
+  }
+
+  _i3.Future<List<_i5.Speaker>> listSpeakers(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required bool isDemo,
+  }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'greeting',
-            method: 'hello',
+            endpoint: 'conversation',
+            method: 'listSpeakers',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'greeting',
-          methodName: 'hello',
-          parameters: _i1.testObjectToJson({'name': name}),
+          endpointPath: 'conversation',
+          methodName: 'listSpeakers',
+          parameters: _i1.testObjectToJson({'isDemo': isDemo}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue =
@@ -476,11 +594,240 @@ class _GreetingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i5.Greeting>);
+                as _i3.Future<List<_i5.Speaker>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
       }
     });
+  }
+}
+
+class _GraphEndpoint {
+  _GraphEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i7.GraphData> getGraphData(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required bool isDemo,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'graph',
+            method: 'getGraphData',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'graph',
+          methodName: 'getGraphData',
+          parameters: _i1.testObjectToJson({'isDemo': isDemo}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i7.GraphData>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> bookmarkNode(
+    _i1.TestSessionBuilder sessionBuilder,
+    int nodeId,
+    bool isBookmarked,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'graph',
+            method: 'bookmarkNode',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'graph',
+          methodName: 'bookmarkNode',
+          parameters: _i1.testObjectToJson({
+            'nodeId': nodeId,
+            'isBookmarked': isBookmarked,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i8.GraphNode>> getBookmarkedNodes(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'graph',
+            method: 'getBookmarkedNodes',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'graph',
+          methodName: 'getBookmarkedNodes',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i8.GraphNode>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _PodcastEndpoint {
+  _PodcastEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i9.IngestionJob> ingestPodcast(
+    _i1.TestSessionBuilder sessionBuilder,
+    String youtubeUrl,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'podcast',
+            method: 'ingestPodcast',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'podcast',
+          methodName: 'ingestPodcast',
+          parameters: _i1.testObjectToJson({'youtubeUrl': youtubeUrl}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i9.IngestionJob>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Stream<_i9.IngestionJob> getJobStatus(
+    _i1.TestSessionBuilder sessionBuilder,
+    int jobId,
+  ) {
+    var _localTestStreamManager = _i1.TestStreamManager<_i9.IngestionJob>();
+    _i1.callStreamFunctionAndHandleExceptions(
+      () async {
+        var _localUniqueSession =
+            (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+              endpoint: 'podcast',
+              method: 'getJobStatus',
+            );
+        var _localCallContext = await _endpointDispatch
+            .getMethodStreamCallContext(
+              createSessionCallback: (_) => _localUniqueSession,
+              endpointPath: 'podcast',
+              methodName: 'getJobStatus',
+              arguments: {'jobId': jobId},
+              requestedInputStreams: [],
+              serializationManager: _serializationManager,
+            );
+        await _localTestStreamManager.callStreamMethod(
+          _localCallContext,
+          _localUniqueSession,
+          {},
+        );
+      },
+      _localTestStreamManager.outputStreamController,
+    );
+    return _localTestStreamManager.outputStreamController.stream;
+  }
+
+  _i3.Future<List<_i10.Podcast>> listPodcasts(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'podcast',
+            method: 'listPodcasts',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'podcast',
+          methodName: 'listPodcasts',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i10.Podcast>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _ProcessPodcastCallFutureCall {
+  Future<void> processPodcast(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i11.ProcessPodcastParams? object,
+  ) async {
+    var _localUniqueSession = (sessionBuilder as _i1.InternalTestSessionBuilder)
+        .internalBuild();
+    try {
+      await _i12.ProcessPodcastCallProcessPodcastFutureCall().invoke(
+        _localUniqueSession,
+        object,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
   }
 }

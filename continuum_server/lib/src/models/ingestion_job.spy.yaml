@@ -1,0 +1,13 @@
+class: IngestionJob
+table: ingestion_job
+
+fields:
+  podcastId: int
+  userId: String
+  stage: String, default="booting up"
+  status: String, default="pending"
+  errorMessage: String?
+  progress: int, default=0
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+  completedAt: DateTime?
