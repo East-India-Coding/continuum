@@ -1,147 +1,98 @@
+import 'package:continuum_server/src/generated/protocol.dart';
+import 'package:continuum_server/src/services/knowledge_curator_tools.dart';
+import 'package:continuum_server/src/services/llm_prompts.dart';
 import 'package:serverpod/serverpod.dart';
-import '../generated/protocol.dart';
 import 'llm_service.dart';
 
 class GraphService {
-  final linkThreshold = 0.35;
-
-  Future<int> mergeOrCreateSpeaker(
-    Session session,
-    String userId,
-    String speakerName,
-  ) async {
-    final normalizedName = speakerName.toLowerCase().replaceAll(' ', '').trim();
-
-    final existingSpeaker = await Speaker.db.findFirstRow(
-      session,
-      where: (t) =>
-          t.userId.equals(userId) & t.normalizedName.equals(normalizedName),
-    );
-
-    if (existingSpeaker != null && existingSpeaker.id != null) {
-      session.log(
-        'GraphService: found existing speaker: $speakerName (id: ${existingSpeaker.id})',
-      );
-      await Speaker.db.updateRow(
-        session,
-        existingSpeaker.copyWith(
-          detectedCount: existingSpeaker.detectedCount + 1,
-          updatedAt: DateTime.now(),
-        ),
-      );
-      return existingSpeaker.id!;
-    }
-
-    session.log('GraphService: Creating new speaker: $speakerName');
-    final speaker = Speaker(
-      userId: userId,
-      name: speakerName,
-      normalizedName: normalizedName,
-      detectedCount: 1,
-    );
-
-    final insertedSpeaker = await Speaker.db.insertRow(session, speaker);
-    return insertedSpeaker.id!;
-  }
-
-  /// Creates nodes and links for a segmented transcript
-  /// Returns the number of nodes created
+  /// Creates nodes and links for a segmented transcript using an Agentic loop
+  /// Returns the number of nodes created (approximate)
   Future<int> processTranscriptIdeas(
     Session session,
     String userId,
     int podcastId,
     String videoId,
-    List<TranscriptTopic> ideas,
-  ) async {
+    List<TranscriptTopic> ideas, {
+    Function(String, int)? onProgress,
+  }) async {
     session.log(
-      'GraphService: processTranscriptIdeas started with ${ideas.length} ideas',
+      'GraphService: processTranscriptIdeas started with ${ideas.length} ideas (Agentic)',
     );
     final llmService = LLMService();
-    int nodesCreated = 0;
 
-    // 1. Generate embeddings in parallel
+    // 1. Initialize Tools
+    final toolsWrapper = KnowledgeCuratorTools(
+      session,
+      userId,
+      podcastId,
+      videoId,
+    );
+    final tools = toolsWrapper.allTools;
+
+    // 2. Create Agent
+    final agent = llmService.createCuratorAgent(tools: tools);
+    int nodesProcessed = 0;
+
+    // 3. Pre-calculate embeddings to pass to the agent
+    if (onProgress != null) onProgress('Generating embeddings...', 0);
     final embeddingTexts = ideas
         .map((idea) => '${idea.label}: ${idea.summary}')
         .toList();
     final embeddings = await llmService.generateEmbeddings(embeddingTexts);
 
-    // 2. Pre-process speakers (Cache IDs)
-    final speakerCache = <String, int>{};
-    final uniqueSpeakers = ideas.map((e) => e.primarySpeaker).toSet();
-
-    for (final speakerName in uniqueSpeakers) {
-      speakerCache[speakerName] = await mergeOrCreateSpeaker(
-        session,
-        userId,
-        speakerName,
-      );
-    }
-
-    // 3. Create Nodes and Links
     for (var i = 0; i < ideas.length; i++) {
       final idea = ideas[i];
-      final ideaEmbedding = embeddings[i];
+      final embeddingVector = embeddings[i];
 
-      final speakerId = speakerCache[idea.primarySpeaker]!;
+      // Use internal registry to avoid passing vector string
+      final embeddingId = 'emb_$i';
+      toolsWrapper.registerEmbedding(embeddingId, embeddingVector);
 
-      final ideaNode = await GraphNode.db.insertRow(
-        session,
-        GraphNode(
-          userId: userId,
-          videoId: videoId,
-          label: idea.label,
-          impactScore: idea.impactScore,
-          summary: idea.summary,
-          primarySpeakerId: speakerId,
-          references: idea.references
-              .map(
-                (r) => QuoteReference(
-                  startTime: r.start,
-                  endTime: r.end,
-                  verbatimQuote: r.quote,
-                ),
-              )
-              .toList(),
-          embedding: ideaEmbedding,
-        ),
-      );
-      nodesCreated++;
+      if (onProgress != null) {
+        onProgress('Curating idea ${i + 1}/${ideas.length}: ${idea.label}', i);
+      }
 
-      // Link similar topics based on distanceCosine (user specific)
-      final similarNodes = await GraphNode.db.find(
-        session,
-        where: (n) =>
-            n.userId.equals(userId) &
-            (n.embedding.distanceCosine(ideaEmbedding) < linkThreshold),
-        orderBy: (n) => n.embedding.distanceCosine(ideaEmbedding),
-      );
-      session.log(
-        'GraphService: processTranscriptIdeas found ${similarNodes.length} similar nodes for idea ${idea.label}',
+      final referencesJson = idea.references
+          .map(
+            (r) => {
+              'start': r.start,
+              'end': r.end,
+              'quote': r.quote,
+            },
+          )
+          .toString();
+
+      final prompt = LLMPrompts.knowledgeCuratorPrompt(
+        idea.label,
+        idea.summary,
+        idea.impactScore,
+        idea.primarySpeaker,
+        referencesJson,
+        embeddingId,
       );
 
-      var rank = 0;
-      for (final similarNode in similarNodes) {
-        if (similarNode.id == ideaNode.id) continue;
+      try {
+        final result = agent.sendStream(prompt);
 
-        final weight = (1.0 - (rank * 0.1)).clamp(0.4, 1.0);
-        rank++;
+        await for (final chunk in result) {
+          if (chunk.thinking != null) {
+            onProgress?.call(chunk.thinking!, i);
+          }
+        }
 
-        await GraphEdge.db.insertRow(
-          session,
-          GraphEdge(
-            userId: userId,
-            sourceNodeId: ideaNode.id!,
-            targetNodeId: similarNode.id!,
-            weight: weight,
-          ),
+        nodesProcessed++;
+      } catch (e) {
+        session.log(
+          'GraphService: Error processing idea ${idea.label}: $e',
+          level: LogLevel.error,
         );
       }
     }
 
     session.log(
-      'GraphService: processTranscriptIdeas completed. Nodes created: $nodesCreated',
+      'GraphService: processTranscriptIdeas completed. Processed: $nodesProcessed ideas',
     );
-    return nodesCreated;
+    return nodesProcessed;
   }
 
   Future<void> bookmarkNode(

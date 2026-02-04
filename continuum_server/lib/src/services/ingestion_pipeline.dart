@@ -155,6 +155,15 @@ class IngestionPipeline {
         podcastId,
         podcast.videoId,
         segmentedTranscript.ideas,
+        onProgress: (message, progress) async {
+          await _updateJobStatus(
+            session,
+            jobId,
+            'processing',
+            message,
+            80 + progress,
+          );
+        },
       );
 
       if (nodeCount == 0) {

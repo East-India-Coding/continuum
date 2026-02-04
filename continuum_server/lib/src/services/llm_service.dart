@@ -133,4 +133,16 @@ class LLMService {
       ),
     );
   }
+
+  Agent createCuratorAgent({required List<Tool> tools}) {
+    Agent.environment['GEMINI_API_KEY'] = _geminiAPIKey;
+    return Agent(
+      'google?chat=gemini-3-pro-preview&embeddings=gemini-embedding-001',
+      tools: tools,
+      enableThinking: true,
+      embeddingsModelOptions: const GoogleEmbeddingsModelOptions(
+        dimensions: 768,
+      ),
+    );
+  }
 }
