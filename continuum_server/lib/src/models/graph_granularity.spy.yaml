@@ -1,0 +1,4 @@
+class: GraphGranularity
+fields:
+  granularity: int
+  graph: GraphElements

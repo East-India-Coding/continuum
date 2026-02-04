@@ -1,0 +1,12 @@
+class: GraphNodeDisplay
+fields:
+  name: String
+  value: double
+  category: int
+  symbolSize: double
+  nodeId: int
+  videoId: String
+  summary: String
+  primarySpeakerId: int
+  references: List<QuoteReference>
+  isBookmarked: bool

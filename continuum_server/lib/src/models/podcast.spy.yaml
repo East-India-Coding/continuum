@@ -1,0 +1,12 @@
+class: Podcast
+table: podcast
+
+fields:
+  youtubeUrl: String
+  userId: String
+  videoId: String
+  title: String?
+  channelName: String?
+  thumbnailUrl: String?
+  createdAt: DateTime, default=now
+  graphExists: bool, default=false

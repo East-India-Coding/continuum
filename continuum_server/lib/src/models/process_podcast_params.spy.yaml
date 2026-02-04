@@ -1,0 +1,5 @@
+class: ProcessPodcastParams
+fields:
+  jobId: int
+  userId: String
+  podcastId: int

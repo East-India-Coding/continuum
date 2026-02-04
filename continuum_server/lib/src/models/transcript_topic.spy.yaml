@@ -1,0 +1,7 @@
+class: TranscriptTopic
+fields:
+  label: String
+  summary: String
+  impactScore: double
+  primarySpeaker: String
+  references: List<TranscriptReference>

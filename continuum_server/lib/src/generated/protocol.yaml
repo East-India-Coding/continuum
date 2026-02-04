@@ -1,0 +1,23 @@
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+googleIdp:
+  - login:
+jwtRefresh:
+  - refreshAccessToken:
+conversation:
+  - askQuestion:
+  - listSpeakers:
+graph:
+  - getGraphData:
+  - bookmarkNode:
+  - getBookmarkedNodes:
+podcast:
+  - ingestPodcast:
+  - getJobStatus:
+  - listPodcasts:
