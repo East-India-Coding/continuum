@@ -80,50 +80,6 @@ class LLMService {
     }
   }
 
-  /// Generates a conversational answer with speaker perspective
-  Stream<String> generateConversationalAnswer(
-    String question,
-    String speakerName,
-    List<GraphNode> nodes,
-  ) async* {
-    try {
-      if (nodes.isEmpty) {
-        yield LLMPrompts.genericAnswerSystemMessage(speakerName);
-        return;
-      }
-
-      final prompt = LLMPrompts.conversationalAnswerPrompt(
-        question,
-        speakerName,
-        nodes
-            .map(
-              (e) => {
-                'label': e.label,
-                'summary': e.summary,
-                'references': e.references.map((r) => r.toString()).toList(),
-                'videoId': e.videoId,
-              },
-            )
-            .toString(),
-      );
-
-      final history = [
-        ChatMessage.system(LLMPrompts.conversationalAnswerSystemMessage),
-      ];
-
-      final resultStream = _agent.sendStream(
-        prompt,
-        history: history,
-      );
-
-      await for (final chunk in resultStream) {
-        yield chunk.output;
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Agent _createAgent() {
     Agent.environment['GEMINI_API_KEY'] = _geminiAPIKey;
     return Agent(

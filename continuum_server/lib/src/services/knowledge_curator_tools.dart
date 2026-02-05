@@ -1,25 +1,26 @@
-import 'dart:math';
-
 import 'package:continuum_server/src/generated/protocol.dart';
 import 'package:dartantic_ai/dartantic_ai.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:serverpod/serverpod.dart' as sp;
+import 'package:continuum_server/src/services/llm_service.dart';
 
 class KnowledgeCuratorTools {
   final sp.Session session;
   final String userId;
-  final int podcastId;
-  final String videoId;
+  final int? podcastId;
+  final String? videoId;
+  final LLMService? llmService;
 
   // Registry to hold embeddings temporarily so they don't need to be passed in prompts
   final Map<String, sp.Vector> _embeddingRegistry = {};
 
   KnowledgeCuratorTools(
     this.session,
-    this.userId,
+    this.userId, {
     this.podcastId,
     this.videoId,
-  );
+    this.llmService,
+  });
 
   void registerEmbedding(String id, sp.Vector vector) {
     _embeddingRegistry[id] = vector;
@@ -35,6 +36,13 @@ class KnowledgeCuratorTools {
     _checkSpeakerIdentityTool,
     _createGraphNodeTool,
     _createGraphEdgeTool,
+  ];
+
+  List<Tool> get conversationTools => [
+    _searchGraphTool,
+    _traverseGraphTool,
+    _getSpeakerContextTool,
+    _detectGapsTool,
   ];
 
   Tool get _searchSimilarNodesTool => Tool(
@@ -82,7 +90,6 @@ class KnowledgeCuratorTools {
                 'id': node.id,
                 'label': node.label,
                 'summary': node.summary,
-                'distance': node.embedding.distanceCosine(vector),
               },
             )
             .toList(),
@@ -225,7 +232,7 @@ class KnowledgeCuratorTools {
         session,
         GraphNode(
           userId: userId,
-          videoId: videoId,
+          videoId: videoId ?? '',
           label: label,
           impactScore: impactScore,
           summary: summary,
@@ -275,6 +282,161 @@ class KnowledgeCuratorTools {
     },
   );
 
+  Tool get _searchGraphTool => Tool(
+    name: 'searchGraph',
+    description:
+        'Performs a semantic search on the Knowledge Graph using a natural language query.',
+    inputSchema: JsonSchema.create({
+      'type': 'object',
+      'properties': {
+        'query': {'type': 'string', 'description': 'The search query string.'},
+        'threshold': {
+          'type': 'number',
+          'description': 'Similarity threshold (default 0.4).',
+        },
+        'limit': {'type': 'integer', 'description': 'Max results (default 5).'},
+      },
+      'required': ['query'],
+    }),
+    onCall: (dynamic arguments) async {
+      if (llmService == null) {
+        throw Exception('LLMService is required for searchGraph');
+      }
+      final params = arguments as Map<String, dynamic>;
+      final query = params['query'] as String;
+      final threshold = (params['threshold'] as num?)?.toDouble() ?? 0.4;
+      final limit = (params['limit'] as int?) ?? 5;
+
+      final embedding = await llmService!.generateEmbedding(query);
+      final nodes = await GraphNode.db.find(
+        session,
+        where: (n) =>
+            n.userId.equals(userId) &
+            (n.embedding.distanceCosine(embedding) < threshold),
+        orderBy: (n) => n.embedding.distanceCosine(embedding),
+        limit: limit,
+      );
+
+      return {
+        'nodes': nodes
+            .map(
+              (n) => {
+                'id': n.id,
+                'label': n.label,
+                'summary': n.summary,
+                'references': n.references
+                    .map(
+                      (r) => {
+                        'quote': r.verbatimQuote,
+                        'start': r.startTime,
+                        'end': r.endTime,
+                      },
+                    )
+                    .toList(),
+                'videoId': n.videoId,
+              },
+            )
+            .toList(),
+      };
+    },
+  );
+
+  Tool get _traverseGraphTool => Tool(
+    name: 'traverseGraph',
+    description:
+        'Traverses the graph starting from a node to find related concepts.',
+    inputSchema: JsonSchema.create({
+      'type': 'object',
+      'properties': {
+        'startNodeId': {'type': 'integer'},
+        'maxHops': {'type': 'integer', 'description': 'Max depth (def 1).'},
+      },
+      'required': ['startNodeId'],
+    }),
+    onCall: (dynamic arguments) async {
+      final params = arguments as Map<String, dynamic>;
+      final startNodeId = params['startNodeId'] as int;
+
+      final edges = await GraphEdge.db.find(
+        session,
+        where: (e) =>
+            e.sourceNodeId.equals(startNodeId) |
+            e.targetNodeId.equals(startNodeId),
+        limit: 10,
+      );
+      final connectedNodeIds = edges
+          .map(
+            (e) =>
+                e.sourceNodeId == startNodeId ? e.targetNodeId : e.sourceNodeId,
+          )
+          .toSet();
+      final nodes = await GraphNode.db.find(
+        session,
+        where: (n) => n.id.inSet(connectedNodeIds),
+      );
+
+      return {
+        'startNodeId': startNodeId,
+        'connectedNodes': nodes
+            .map((n) => {'id': n.id, 'label': n.label, 'summary': n.summary})
+            .toList(),
+      };
+    },
+  );
+
+  Tool get _getSpeakerContextTool => Tool(
+    name: 'getSpeakerContext',
+    description: 'Retrieves metadata about a speaker.',
+    inputSchema: JsonSchema.create({
+      'type': 'object',
+      'properties': {
+        'speakerId': {'type': 'integer'},
+      },
+      'required': ['speakerId'],
+    }),
+    onCall: (dynamic arguments) async {
+      final params = arguments as Map<String, dynamic>;
+      final speakerId = params['speakerId'] as int;
+      final speaker = await Speaker.db.findById(session, speakerId);
+      if (speaker == null) return {'error': 'Speaker not found'};
+      return {
+        'speaker': {
+          'id': speaker.id,
+          'name': speaker.name,
+          'detectedCount': speaker.detectedCount,
+        },
+      };
+    },
+  );
+
+  Tool get _detectGapsTool => Tool(
+    name: 'detectGaps',
+    description:
+        'Analyzes the current retrieved context and the question to identify missing information.',
+    inputSchema: JsonSchema.create({
+      'type': 'object',
+      'properties': {
+        'currentContextSummary': {
+          'type': 'string',
+          'description': 'Summary of nodes retrieved so far.',
+        },
+        'question': {'type': 'string'},
+      },
+      'required': ['currentContextSummary', 'question'],
+    }),
+    onCall: (dynamic arguments) async {
+      final params = arguments as Map<String, dynamic>;
+      final context = params['currentContextSummary'] as String;
+      if (context.length < 50) {
+        return {
+          'gap':
+              'Context is very sparse. Consider external search or broader graph search.',
+        };
+      }
+      return {'gap': 'Likely covers the basics.'};
+    },
+  );
+
   Future<int> _mergeOrCreateSpeaker(
     sp.Session session,
     String userId,
@@ -312,31 +474,5 @@ class KnowledgeCuratorTools {
 
     final insertedSpeaker = await Speaker.db.insertRow(session, speaker);
     return insertedSpeaker.id!;
-  }
-}
-
-extension VectorCosineDistance on sp.Vector {
-  double distanceCosine(sp.Vector other) {
-    final a = toList();
-    final b = other.toList();
-
-    if (a.length != b.length || a.isEmpty) {
-      throw ArgumentError("Vectors must have the same non-zero length.");
-    }
-
-    double dotProduct = 0.0;
-    double normA = 0.0;
-    double normB = 0.0;
-
-    for (int i = 0; i < a.length; i++) {
-      dotProduct += a[i] * b[i];
-      normA += pow(a[i], 2);
-      normB += pow(b[i], 2);
-    }
-
-    if (normA == 0 || normB == 0) return 0.0;
-
-    final similarity = dotProduct / (sqrt(normA) * sqrt(normB));
-    return 1 - similarity;
   }
 }

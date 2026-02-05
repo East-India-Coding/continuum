@@ -1,12 +1,14 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/llm_service.dart';
+import '../services/knowledge_curator_tools.dart';
+import '../services/llm_prompts.dart';
 
 class ConversationEndpoint extends Endpoint {
   final double distanceThreshold = 0.4;
 
   /// Answers questions using stored knowledge graph and speaker perspective
-  Stream<String> askQuestion(
+  Stream<AgentResponse> askQuestion(
     Session session,
     String question,
     Speaker speaker, {
@@ -26,25 +28,35 @@ class ConversationEndpoint extends Endpoint {
     }
 
     final llmService = LLMService();
-    final questionEmbedding = await llmService.generateEmbedding(question);
-
-    final nodes = await GraphNode.db.find(
+    final toolsWrapper = KnowledgeCuratorTools(
       session,
-      where: (n) =>
-          n.userId.equals(userId) &
-          n.primarySpeakerId.equals(speaker.id!) &
-          (n.embedding.distanceCosine(questionEmbedding) < distanceThreshold),
-      limit: 5,
+      userId,
+      llmService: llmService,
     );
 
-    final answerStream = llmService.generateConversationalAnswer(
+    final agent = llmService.createCuratorAgent(
+      tools: toolsWrapper.conversationTools,
+    );
+
+    final prompt = LLMPrompts.conversationalAnswerPrompt(
       question,
       speaker.name,
-      nodes,
     );
 
-    await for (var chunk in answerStream) {
-      yield chunk;
+    try {
+      final stream = agent.sendStream(prompt);
+      await for (final chunk in stream) {
+        if ((chunk.thinking != null && chunk.thinking!.isNotEmpty) ||
+            (chunk.output.isNotEmpty)) {
+          yield AgentResponse(
+            thinking: chunk.thinking,
+            result: chunk.output.isNotEmpty ? chunk.output : null,
+          );
+        }
+      }
+    } catch (e) {
+      session.log('Error in askQuestion: $e', level: LogLevel.error);
+      yield AgentResponse(result: 'I encountered an error: $e');
     }
   }
 

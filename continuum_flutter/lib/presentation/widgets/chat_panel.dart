@@ -1,15 +1,15 @@
 import 'dart:async';
-import 'package:auto_size_text/auto_size_text.dart';
 
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:continuum_client/continuum_client.dart';
+import 'package:continuum_flutter/presentation/controllers/conversation_controller.dart';
+import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jumping_dot/jumping_dot.dart';
-import 'package:continuum_client/continuum_client.dart';
-import 'package:continuum_flutter/presentation/controllers/conversation_controller.dart';
-import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ChatPanel extends ConsumerStatefulWidget {
@@ -391,6 +391,23 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                                 ),
                               ),
                               const SizedBox(height: 4),
+                              if (msg.thinking != null && state.isStreaming)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: AutoSizeText(
+                                    msg.thinking!.substring(
+                                      (msg.thinking!.length - 150) <= 0
+                                          ? 0
+                                          : (msg.thinking!.length - 150),
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.rajdhani(
+                                      color: ContinuumColors.textGrey,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
                               Container(
                                 decoration: const BoxDecoration(
                                   border: Border(
@@ -403,15 +420,16 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                                     0xFF1E1E1E,
                                   ),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
+                                padding: const EdgeInsets.only(
+                                  left: 12,
+                                  right: 12,
+                                  bottom: 12,
                                 ),
                                 child: ConstrainedBox(
                                   constraints: const BoxConstraints(
                                     minWidth: 30,
                                   ),
-                                  child: msg.text == '...'
+                                  child: msg.result == '...'
                                       ? SizedBox(
                                           width: 30,
                                           height: 16,
@@ -425,7 +443,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                                           ),
                                         )
                                       : RichText(
-                                          text: _buildRichTextSpan(msg.text),
+                                          text: _buildRichTextSpan(msg.result),
                                         ),
                                 ),
                               ),
@@ -469,7 +487,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                                   vertical: 10,
                                 ),
                                 child: Text(
-                                  msg.text,
+                                  msg.result,
                                   style: GoogleFonts.rajdhani(
                                     color: ContinuumColors.textGrey,
                                     fontSize: 13,

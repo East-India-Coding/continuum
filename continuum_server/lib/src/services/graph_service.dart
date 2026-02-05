@@ -24,8 +24,8 @@ class GraphService {
     final toolsWrapper = KnowledgeCuratorTools(
       session,
       userId,
-      podcastId,
-      videoId,
+      podcastId: podcastId,
+      videoId: videoId,
     );
     final tools = toolsWrapper.allTools;
 

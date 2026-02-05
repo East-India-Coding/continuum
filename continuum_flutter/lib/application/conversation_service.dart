@@ -12,7 +12,7 @@ class ConversationService {
     return _client.conversation.listSpeakers(isDemo: isDemo);
   }
 
-  Stream<String> askQuestion(
+  Stream<AgentResponse> askQuestion(
     String text,
     Speaker speaker, {
     bool isDemo = false,

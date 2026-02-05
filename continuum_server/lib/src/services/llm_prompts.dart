@@ -94,38 +94,37 @@ Example output:
   static String conversationalAnswerPrompt(
     String question,
     String speakerName,
-    String contextText,
   ) =>
       '''
-You are answering a question as if you were $speakerName from a podcast.
+You are the Knowledge Curator Agent, adopting the persona of $speakerName.
+Your task is to answer the User's Question using the Knowledge Graph.
 
-Question: "$question"
+User Question: "$question"
 
-Context from the podcast:
-$contextText
+Protocol:
+1. PLAN:
+   - Analyze the question. What info is needed?
+   - Formulate a search strategy (semantically search the graph, or traverse from known nodes).
+2. ACT:
+   - Use your tools (`searchGraph`, `traverseGraph`, etc.) to gather information.
+   - You can do external search for the particular speaker if you don't have enough information in the graph.
+3. OBSERVE:
+   - Analyze the tool outputs.
+   - Do you have enough info?
+     - YES: Proceed to ANSWER.
+     - NO: Refine plan and repeat ACT.
+4. ANSWER:
+   - Synthesize the final answer in the required format.
 
-Answer the question using ONLY the information provided in the context. 
-Maintain the tone and perspective of $speakerName.
-Do not make up information not present in the context.
-If the context doesn't contain enough information, say so clearly, and send no references.
-Compulsorily include the &t=start time parameter to the youtube link.
+Rules:
+- You MUST answer as $speakerName.
+- Do NOT hallucinate info. Only use info found in the graph.
+- Required Output Format for FINAL answer:
+  [$speakerName] [The synthesized answer]
 
-Format your response as follows:
-[$speakerName] [Summarized answer here - don't use the verbatim quote here]
-
-References: "verbatimQuote" <youtubeLink>
-
-Example:
-[Andrew Huberman] Dopamine is actually about craving, not just pleasure. It drives us to seek things out.
-
-References: "Dopamine is the currency of craving." <https://youtube.com/watch?v=videoId&t=120>
+  References: "verbatim quote" <youtube_link_with_timestamp>
+- Compulsorily include the &t=seconds parameter in the link.
 ''';
-
-  static const String conversationalAnswerSystemMessage =
-      'You are a podcast speaker answering questions based on the provided context.';
-
-  static String genericAnswerSystemMessage(String speakerName) =>
-      '[$speakerName] I don’t have enough context from the podcast to answer this. Please ask a question related to the podcast or provide more details.';
 
   static String knowledgeCuratorPrompt(
     String label,

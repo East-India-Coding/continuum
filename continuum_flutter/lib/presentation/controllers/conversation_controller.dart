@@ -7,14 +7,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'conversation_controller.g.dart';
 
 class ChatMessage {
-  const ChatMessage({required this.text, required this.isUser});
+  const ChatMessage({
+    required this.result,
+    required this.thinking,
+    required this.isUser,
+  });
 
-  final String text;
+  final String result;
+  final String? thinking;
   final bool isUser;
 
-  ChatMessage copyWith({String? text, bool? isUser}) {
+  ChatMessage copyWith({String? result, String? thinking, bool? isUser}) {
     return ChatMessage(
-      text: text ?? this.text,
+      result: result ?? this.result,
+      thinking: thinking ?? this.thinking,
       isUser: isUser ?? this.isUser,
     );
   }
@@ -72,8 +78,8 @@ class ConversationController extends _$ConversationController {
     }
 
     final currentMessages = List<ChatMessage>.from(state.messages)
-      ..add(ChatMessage(text: text, isUser: true))
-      ..add(const ChatMessage(text: '...', isUser: false));
+      ..add(ChatMessage(result: text, thinking: null, isUser: true))
+      ..add(const ChatMessage(result: '...', thinking: '...', isUser: false));
 
     state = state.copyWith(
       messages: currentMessages,
@@ -93,14 +99,19 @@ class ConversationController extends _$ConversationController {
         if (messages.isNotEmpty && !messages.last.isUser) {
           final lastMsg = messages.last;
           messages.last = lastMsg.copyWith(
-            text: lastMsg.text == '...' ? chunk : lastMsg.text + chunk,
+            result: lastMsg.result == '...'
+                ? chunk.result
+                : lastMsg.result + (chunk.result ?? ''),
+            thinking: lastMsg.thinking == '...'
+                ? chunk.thinking
+                : (lastMsg.thinking ?? '') + (chunk.thinking ?? ''),
           );
           state = state.copyWith(messages: messages);
         }
       }
     } catch (e) {
       final messages = List<ChatMessage>.from(state.messages)
-        ..add(ChatMessage(text: 'Error: $e', isUser: false));
+        ..add(ChatMessage(result: 'Error: $e', thinking: null, isUser: false));
       state = state.copyWith(messages: messages);
     } finally {
       state = state.copyWith(isStreaming: false);

@@ -1,0 +1,4 @@
+class: AgentResponse
+fields:
+  thinking: String?
+  result: String?
