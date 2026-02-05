@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:continuum_flutter/presentation/widgets/continuum_header.dart';
 import 'package:continuum_flutter/presentation/widgets/continuum_sidebar.dart';
+import 'package:flutter/material.dart';
 
 class ContinuumLayout extends StatelessWidget {
   const ContinuumLayout({required this.child, super.key});

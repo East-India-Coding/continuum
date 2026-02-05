@@ -1,20 +1,20 @@
 import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:live_indicator/live_indicator.dart';
 import 'package:continuum_client/continuum_client.dart';
 import 'package:continuum_flutter/application/serverpod_client.dart';
 import 'package:continuum_flutter/constants.dart';
 import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:continuum_flutter/presentation/utils/url_launcher.dart';
 import 'package:continuum_flutter/presentation/widgets/animated_background.dart';
+import 'package:continuum_flutter/presentation/widgets/continuum_header.dart';
 import 'package:continuum_flutter/presentation/widgets/cyberpunk_button.dart';
 import 'package:continuum_flutter/presentation/widgets/hover_link_text.dart';
-import 'package:continuum_flutter/presentation/widgets/continuum_header.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:live_indicator/live_indicator.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
@@ -103,8 +103,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFF330000)),
-        color: const Color(0xFF1A0505),
+        border: Border.all(color: const Color(0xFF003333)),
+        color: const Color(0xFF051A1A),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -117,7 +117,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           const SizedBox(width: 10),
           Flexible(
             child: AutoSizeText(
-              'KNOWLEDGE GRAPH BUILDER',
+              'AGENTIC KNOWLEDGE ENGINE',
               maxLines: 1,
               style: GoogleFonts.robotoMono(
                 color: ContinuumColors.accent,
@@ -133,7 +133,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   Widget _buildSubtitle() {
     return AutoSizeText(
-      '''Turn podcasts into structured knowledge graphs you can search, explore, and recall.'''
+      '''Transform audio streams into interactive knowledge networks for exploration and retention.'''
           .toUpperCase(),
       textAlign: TextAlign.center,
       maxLines: 2,
@@ -174,7 +174,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             child: Column(
               children: [
                 const AutoSizeText(
-                  'ACCESS THE GRAPH',
+                  'ENTER THE GRID',
                   maxLines: 1,
                   style: TextStyle(
                     color: ContinuumColors.white,
@@ -186,7 +186,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 ),
                 const SizedBox(height: 12),
                 AutoSizeText(
-                  'AUTHORIZE CREDENTIALS TO INITIATE KNOWLEDGE MAPPING',
+                  '''Synchronize your profile to start mapping podcasts into knowledge graphs.'''
+                      .toUpperCase(),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   style: GoogleFonts.rajdhani(
@@ -291,16 +292,16 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       decoration: BoxDecoration(
         border: Border(
           top: isTop
-              ? const BorderSide(color: Colors.redAccent, width: 2)
+              ? const BorderSide(color: ContinuumColors.accent, width: 2)
               : BorderSide.none,
           bottom: !isTop
-              ? const BorderSide(color: Colors.redAccent, width: 2)
+              ? const BorderSide(color: ContinuumColors.accent, width: 2)
               : BorderSide.none,
           left: isLeft
-              ? const BorderSide(color: Colors.redAccent, width: 2)
+              ? const BorderSide(color: ContinuumColors.accent, width: 2)
               : BorderSide.none,
           right: !isLeft
-              ? const BorderSide(color: Colors.redAccent, width: 2)
+              ? const BorderSide(color: ContinuumColors.accent, width: 2)
               : BorderSide.none,
         ),
       ),
@@ -325,9 +326,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'BUILT WITH',
-                      style: GoogleFonts.rajdhani(
+                    const Text(
+                      'POWERED BY',
+                      style: TextStyle(
                         color: ContinuumColors.accent,
                         fontSize: 10,
                         letterSpacing: 1,
@@ -336,10 +337,12 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'SERVERPOD & FLUTTER',
-                      style: GoogleFonts.shareTechMono(
-                        color: Colors.grey,
-                        fontSize: 10,
+                      'GEMINI & FLUTTER',
+                      style: GoogleFonts.rajdhani(
+                        color: ContinuumColors.textGrey,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.5,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -347,7 +350,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 const Spacer(),
               ],
               _buildLinkText(
-                'VIEW ON GITHUB',
+                'SOURCE CODE',
                 onTap: () {
                   unawaited(
                     UrlLauncher.launchURLNewTab(ContinuumConstants.githubUrl),
@@ -355,7 +358,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 },
               ),
               _buildLinkText(
-                'VIEW ON DEVPOST',
+                'DEVPOST PAGE',
                 onTap: () {
                   unawaited(
                     UrlLauncher.launchURLNewTab(ContinuumConstants.devpostUrl),

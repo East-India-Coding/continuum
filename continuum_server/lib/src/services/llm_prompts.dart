@@ -107,7 +107,6 @@ Protocol:
    - Formulate a search strategy (semantically search the graph, or traverse from known nodes).
 2. ACT:
    - Use your tools (`searchGraph`, `traverseGraph`, etc.) to gather information.
-   - You can do external search for the particular speaker if you don't have enough information in the graph.
 3. OBSERVE:
    - Analyze the tool outputs.
    - Do you have enough info?
@@ -124,6 +123,7 @@ Rules:
 
   References: "verbatim quote" <youtube_link_with_timestamp>
 - Compulsorily include the &t=seconds parameter in the link.
+- If reference isn't available, don't include it.
 ''';
 
   static String knowledgeCuratorPrompt(

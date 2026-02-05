@@ -1,19 +1,19 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:continuum_client/continuum_client.dart';
+import 'package:continuum_flutter/application/audio_service.dart';
+import 'package:continuum_flutter/presentation/controllers/graph_controller.dart';
+import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
+import 'package:continuum_flutter/presentation/widgets/chat_panel.dart';
+import 'package:continuum_flutter/presentation/widgets/continuum_dialog.dart';
+import 'package:continuum_flutter/presentation/widgets/cyberpunk_button.dart';
+import 'package:continuum_flutter/presentation/widgets/node_info_dialog.dart';
+import 'package:continuum_flutter/presentation/widgets/speaker_checklist.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:graphify/graphify.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:continuum_client/continuum_client.dart';
-import 'package:continuum_flutter/application/audio_service.dart';
-import 'package:continuum_flutter/presentation/controllers/graph_controller.dart';
-import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
-import 'package:continuum_flutter/presentation/widgets/chat_panel.dart';
-import 'package:continuum_flutter/presentation/widgets/cyberpunk_button.dart';
-import 'package:continuum_flutter/presentation/widgets/node_info_dialog.dart';
-import 'package:continuum_flutter/presentation/widgets/continuum_dialog.dart';
-import 'package:continuum_flutter/presentation/widgets/speaker_checklist.dart';
 
 class ForceDirectedGraphPage extends ConsumerStatefulWidget {
   const ForceDirectedGraphPage({super.key, this.isDemo = false});

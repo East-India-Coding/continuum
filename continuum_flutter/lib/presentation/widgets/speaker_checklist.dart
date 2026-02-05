@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:continuum_client/continuum_client.dart';
 import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
+import 'package:flutter/material.dart';
 
 class SpeakerChecklist extends StatelessWidget {
   const SpeakerChecklist({

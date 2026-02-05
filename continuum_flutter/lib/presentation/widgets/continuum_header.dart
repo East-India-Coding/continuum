@@ -1,16 +1,16 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:continuum_flutter/application/audio_service.dart';
 import 'package:continuum_flutter/application/auth_service.dart';
 import 'package:continuum_flutter/constants.dart';
 import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:continuum_flutter/presentation/utils/url_launcher.dart';
-import 'package:continuum_flutter/presentation/widgets/hover_link_text.dart';
 import 'package:continuum_flutter/presentation/widgets/continuum_dialog.dart';
+import 'package:continuum_flutter/presentation/widgets/hover_link_text.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 class ContinuumHeader extends ConsumerWidget {
@@ -76,7 +76,7 @@ class ContinuumHeader extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '''Continuum extracts structured knowledge from podcasts and organizes it into an interactive graph. Each idea is connected, source-grounded, and queryable, turning passive listening into a durable, explorable knowledge system.''',
+                              '''Continuum is an autonomous multimodal knowledge curator powered by Gemini 3 that turns passive media into an evolving cognitive system. It actively understands, organizes, connects, and reasons over everything you learn.''',
                               style: GoogleFonts.rajdhani(
                                 fontSize: 14,
                                 color: Colors.grey,

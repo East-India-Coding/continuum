@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:continuum_client/continuum_client.dart';
 import 'package:continuum_flutter/application/serverpod_client.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 

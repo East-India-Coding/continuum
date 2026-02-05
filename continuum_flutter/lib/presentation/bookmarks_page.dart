@@ -1,10 +1,10 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:continuum_client/continuum_client.dart';
 import 'package:continuum_flutter/application/graph_service.dart';
 import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:continuum_flutter/presentation/widgets/node_info_dialog.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BookmarksPage extends ConsumerWidget {
   const BookmarksPage({super.key});

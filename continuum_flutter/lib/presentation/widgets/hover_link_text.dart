@@ -1,8 +1,8 @@
+import 'package:continuum_flutter/application/audio_service.dart';
+import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:continuum_flutter/application/audio_service.dart';
-import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 
 class HoverLinkText extends ConsumerStatefulWidget {
   const HoverLinkText({

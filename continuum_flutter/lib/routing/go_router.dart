@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:continuum_flutter/application/auth_service.dart';
 import 'package:continuum_flutter/application/graph_service.dart';
 import 'package:continuum_flutter/presentation/bookmarks_page.dart';
@@ -8,6 +6,8 @@ import 'package:continuum_flutter/presentation/home_page.dart';
 import 'package:continuum_flutter/presentation/sign_in_page.dart';
 import 'package:continuum_flutter/presentation/unknown_page.dart';
 import 'package:continuum_flutter/presentation/widgets/continuum_layout.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'go_router.g.dart';
@@ -19,7 +19,7 @@ GoRouter goRouter(Ref ref) {
   return GoRouter(
     initialLocation: '/',
     refreshListenable: authService.authInfoListenable,
-    redirect: (context, GoRouterState state) async {
+    redirect: (context, state) async {
       try {
         final isLoggedIn = authService.isAuthenticated;
 

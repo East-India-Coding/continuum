@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:continuum_flutter/application/audio_service.dart';
 import 'package:continuum_flutter/presentation/controllers/home_controller.dart';
 import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:continuum_flutter/presentation/widgets/animated_background.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -59,7 +59,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           }
         }
 
-        _logs.add('[$timeStr] ${status.toUpperCase()}...');
+        _logs.add('[$timeStr] ${status.toUpperCase()}');
         _lastStatus = status;
       });
 
@@ -142,7 +142,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       key: const ValueKey('input_form'),
       children: [
         AutoSizeText(
-          'PODCAST',
+          'VIDEO',
           textAlign: TextAlign.center,
           maxLines: 1,
           style: GoogleFonts.orbitron(
@@ -177,7 +177,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
         // Subtitle
         AutoSizeText(
-          '''Convert long-form podcast into structured, explorable knowledge graphs in real time.'''
+          '''Synthesize long-form audio into multidimensional knowledge structures instantly.'''
               .toUpperCase(),
           textAlign: TextAlign.center,
           maxLines: 3,
@@ -217,7 +217,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     fontSize: 18,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'INPUT YOUTUBE URL...',
+                    hintText: 'ENTER YOUTUBE URL...',
                     hintStyle: GoogleFonts.shareTechMono(
                       color: ContinuumColors.accentDark,
                       fontSize: 18,
@@ -234,7 +234,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'SOURCE: YOUTUBE',
+                    'ORIGIN: YOUTUBE',
                     style: GoogleFonts.rajdhani(
                       color: ContinuumColors.accentDark,
                       fontSize: 10,
@@ -242,7 +242,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                   ),
                   Text(
-                    'MODE: AUDIO STREAM',
+                    'PROTOCOL: AUDIO STREAM',
                     style: GoogleFonts.rajdhani(
                       color: ContinuumColors.accentDark,
                       fontSize: 10,
@@ -270,7 +270,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         Center(
           child: HoverCyberButton(
             onPressed: _handleGenerate,
-            text: 'Start Graph Construction'.toUpperCase(),
+            text: 'Initiate Graph Synthesis'.toUpperCase(),
           ),
         ),
       ],
@@ -296,7 +296,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             const SizedBox(width: 12),
             Flexible(
               child: AutoSizeText(
-                'CONSTRUCTING NODES...',
+                'SYNTHESIZING NODES...',
                 maxLines: 2,
                 style: GoogleFonts.orbitron(
                   color: ContinuumColors.accent,
@@ -316,7 +316,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
         const SizedBox(height: 8),
         AutoSizeText(
-          'EXTRACTING KNOWLEDGE ENTITIES',
+          'IDENTIFYING SEMANTIC CONCEPTS',
           textAlign: TextAlign.center,
           maxLines: 2,
           style: GoogleFonts.rajdhani(
@@ -332,8 +332,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         Container(
           height: 24,
           decoration: BoxDecoration(
-            color: const Color(0xFF110000),
-            border: Border.all(color: const Color(0xFF330000)),
+            color: const Color(0xFF001111),
+            border: Border.all(color: const Color(0xFF003333)),
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -503,7 +503,7 @@ class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = ContinuumColors.accentDark.withValues(alpha: 0.2)
+      ..color = ContinuumColors.accentDark.withValues(alpha: 0.07)
       ..strokeWidth = 1;
 
     const spacing = 40.0;

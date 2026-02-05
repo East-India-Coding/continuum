@@ -1,6 +1,6 @@
+import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
-import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 
 class AnimatedBackground extends StatelessWidget {
   const AnimatedBackground({

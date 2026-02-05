@@ -1,9 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:continuum_flutter/application/audio_service.dart';
+import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:continuum_flutter/application/audio_service.dart';
-import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 
 class CyberpunkButton extends ConsumerStatefulWidget {
   const CyberpunkButton({
@@ -29,17 +29,17 @@ class _CyberpunkButtonState extends ConsumerState<CyberpunkButton> {
   @override
   Widget build(BuildContext context) {
     // Primary Button Colors
-    const primaryBg = Color(0xFF220505);
-    const primaryBgHover = Color(0xFF330505);
-    const primaryBorder = Color(0xFF550000);
-    const primaryBorderHover = Color(0xFF880000);
+    const primaryBg = Color(0xFF052222);
+    const primaryBgHover = Color(0xFF053333);
+    const primaryBorder = Color(0xFF005555);
+    const primaryBorderHover = Color(0xFF008888);
 
     // Secondary Button Colors
     const secondaryBg = Colors.transparent;
-    const secondaryBgHover = Color(0xFF1A0505);
-    const secondaryBorder = Color(0xFF550000);
-    const secondaryBorderHover = Color(0xFF880000);
-    const secondaryText = Color(0xFFAA0000);
+    const secondaryBgHover = Color(0xFF051A1A);
+    const secondaryBorder = Color(0xFF005555);
+    const secondaryBorderHover = Color(0xFF008888);
+    const secondaryText = Color(0xFF00AAAA);
     const secondaryTextHover = ContinuumColors.accent;
 
     Color getBackgroundColor() {
@@ -68,8 +68,8 @@ class _CyberpunkButtonState extends ConsumerState<CyberpunkButton> {
         return [
           BoxShadow(
             color: _isHovering
-                ? Colors.redAccent.withValues(alpha: 0.3)
-                : Colors.redAccent.withValues(alpha: 0.1),
+                ? ContinuumColors.accent.withValues(alpha: 0.3)
+                : ContinuumColors.accent.withValues(alpha: 0.1),
             blurRadius: _isHovering ? 15 : 10,
             spreadRadius: _isHovering ? 2 : 1,
           ),
@@ -78,7 +78,7 @@ class _CyberpunkButtonState extends ConsumerState<CyberpunkButton> {
       return _isHovering
           ? [
               BoxShadow(
-                color: Colors.redAccent.withValues(alpha: 0.05),
+                color: ContinuumColors.accent.withValues(alpha: 0.05),
                 blurRadius: 10,
               ),
             ]

@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:continuum_flutter/application/podcast_service.dart';
 import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:continuum_flutter/presentation/utils/url_launcher.dart';
 import 'package:continuum_flutter/presentation/widgets/continuum_dialog.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PodcastsDialog extends ConsumerWidget {
   const PodcastsDialog({super.key});
