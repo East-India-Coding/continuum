@@ -70,7 +70,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
           TextSpan(
             text: text.substring(lastMatchEnd, match.start),
             style: GoogleFonts.rajdhani(
-              color: const Color(0xFFE0E0E0),
+              color: ContinuumColors.textGrey,
               fontSize: 13,
             ),
           ),
@@ -85,7 +85,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
           TextSpan(
             text: matchText,
             style: GoogleFonts.rajdhani(
-              color: const Color(0xFFE0E0E0),
+              color: ContinuumColors.textGrey,
               fontSize: 13,
               fontStyle: FontStyle.italic,
             ),
@@ -130,8 +130,8 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
       spans.add(
         TextSpan(
           text: text.substring(lastMatchEnd),
-          style: const TextStyle(
-            color: Color(0xFFE0E0E0),
+          style: GoogleFonts.rajdhani(
+            color: ContinuumColors.textGrey,
             fontSize: 13,
           ),
         ),
@@ -394,17 +394,27 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                               if (msg.thinking != null && state.isStreaming)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 4),
-                                  child: AutoSizeText(
-                                    msg.thinking!.substring(
-                                      (msg.thinking!.length - 150) <= 0
-                                          ? 0
-                                          : (msg.thinking!.length - 150),
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.rajdhani(
-                                      color: ContinuumColors.textGrey,
-                                      fontSize: 13,
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    transitionBuilder: (child, animation) {
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      );
+                                    },
+                                    child: AutoSizeText(
+                                      msg.thinking!.length > 150
+                                          ? msg.thinking!.substring(
+                                              msg.thinking!.length - 150,
+                                            )
+                                          : msg.thinking!,
+                                      key: ValueKey(msg.thinking!.length),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.rajdhani(
+                                        color: ContinuumColors.textGrey,
+                                        fontSize: 13,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -420,10 +430,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                                     0xFF1E1E1E,
                                   ),
                                 ),
-                                padding: const EdgeInsets.only(
-                                  left: 12,
-                                  right: 12,
-                                  bottom: 12,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
                                 ),
                                 child: ConstrainedBox(
                                   constraints: const BoxConstraints(
@@ -443,7 +452,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                                           ),
                                         )
                                       : RichText(
-                                          text: _buildRichTextSpan(msg.result),
+                                          text: _buildRichTextSpan(
+                                            msg.result.trim(),
+                                          ),
                                         ),
                                 ),
                               ),
