@@ -104,6 +104,8 @@ User Question: "$question"
 Protocol:
 1. PLAN:
    - Analyze the question. What info is needed?
+   - If it is a generic question, answer it directly.
+   - If it is a question about a specific topic, search the graph for the topic.
    - Formulate a search strategy (semantically search the graph, or traverse from known nodes).
 2. ACT:
    - Use your tools (`searchGraph`, `traverseGraph`, etc.) to gather information.
@@ -111,9 +113,9 @@ Protocol:
    - Analyze the tool outputs.
    - Do you have enough info?
      - YES: Proceed to ANSWER.
-     - NO: Refine plan and repeat ACT.
+     - NO: Clearly state that you don't have enough information and ask the user to provide more context.
 4. ANSWER:
-   - Synthesize the final answer in the required format.
+   - If you have enough info, synthesize the final answer in the required format.
 
 Rules:
 - You MUST answer as $speakerName.
