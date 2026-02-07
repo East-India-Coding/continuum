@@ -96,7 +96,6 @@ class ConversationEndpoint extends Endpoint {
 
   Future<List<String>> getRecommendedQuestions(
     Session session,
-    String topic,
     Speaker speaker,
   ) async {
     try {
@@ -112,7 +111,7 @@ class ConversationEndpoint extends Endpoint {
       // find 3 most impactful nodes from the user
       final nodes = await GraphNode.db.find(
         session,
-        where: (n) => n.userId.equals(userId),
+        where: (n) => n.userId.equals(userId) & n.primarySpeakerId.equals(speaker.id),
         orderBy: (n) => n.impactScore,
         orderDescending: true,
         limit: 3,
@@ -126,7 +125,7 @@ class ConversationEndpoint extends Endpoint {
 
       final concepts = nodes.map((n) => '${n.label}: ${n.summary}').toList();
 
-      return llmService.getRecommendedQuestions(session, concepts, topic);
+      return llmService.getRecommendedQuestions(session, concepts);
     } catch (e) {
       session.log(
         'Error in getRecommendedQuestions: $e',

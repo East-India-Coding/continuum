@@ -317,11 +317,6 @@ class Endpoints extends _i1.EndpointDispatch {
         'getRecommendedQuestions': _i1.MethodConnector(
           name: 'getRecommendedQuestions',
           params: {
-            'topic': _i1.ParameterDescription(
-              name: 'topic',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
             'speaker': _i1.ParameterDescription(
               name: 'speaker',
               type: _i1.getType<_i8.Speaker>(),
@@ -335,7 +330,6 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async => (endpoints['conversation'] as _i5.ConversationEndpoint)
                   .getRecommendedQuestions(
                     session,
-                    params['topic'],
                     params['speaker'],
                   ),
         ),

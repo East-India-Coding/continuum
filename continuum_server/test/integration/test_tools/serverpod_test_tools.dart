@@ -605,7 +605,6 @@ class _ConversationEndpoint {
 
   _i3.Future<List<String>> getRecommendedQuestions(
     _i1.TestSessionBuilder sessionBuilder,
-    String topic,
     _i6.Speaker speaker,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -619,10 +618,7 @@ class _ConversationEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'conversation',
           methodName: 'getRecommendedQuestions',
-          parameters: _i1.testObjectToJson({
-            'topic': topic,
-            'speaker': speaker,
-          }),
+          parameters: _i1.testObjectToJson({'speaker': speaker}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue =

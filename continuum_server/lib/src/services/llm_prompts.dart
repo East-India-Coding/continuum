@@ -170,13 +170,10 @@ Rules:
 - Be critical. Do not create nodes for everything. Reject duplicates or low-value items.
 ''';
 
-  static String recommendedQuestionsPrompt(
-    List<String> concepts,
-    String topic,
-  ) =>
+  static String recommendedQuestionsPrompt(List<String> concepts) =>
       '''
 You are an expert interviewer and conversation starter.
-Your goal is to generate 3 thought-provoking questions based on the following impactful concepts related to "$topic".
+Your goal is to generate 3 thought-provoking questions based on the following impactful concepts.
 
 Concepts:
 ${concepts.map((c) => "- $c").join('\n')}

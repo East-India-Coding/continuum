@@ -105,10 +105,9 @@ class LLMService {
   Future<List<String>> getRecommendedQuestions(
     Session session,
     List<String> concepts,
-    String topic,
   ) async {
     try {
-      final prompt = LLMPrompts.recommendedQuestionsPrompt(concepts, topic);
+      final prompt = LLMPrompts.recommendedQuestionsPrompt(concepts);
       final response = await _agent.sendFor<Map<String, dynamic>>(
         prompt,
         outputSchema: LLMPrompts.recommendedQuestionsSchema,
