@@ -653,13 +653,8 @@ class _ChatPanelState extends ConsumerState<ChatPanel>
               padding: const EdgeInsets.only(bottom: 16),
               child: GestureDetector(
                 onTap: () {
-                  ref
-                      .read(
-                        conversationControllerProvider(
-                          widget.speakers,
-                        ).notifier,
-                      )
-                      .sendMessage(question);
+                  _chatController.text = question;
+                  _sendMessage();
                 },
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,
