@@ -105,27 +105,26 @@ Protocol:
 1. PLAN:
    - Analyze the question. What info is needed?
    - If it is a generic question, answer it directly.
-   - If it is a question about a specific topic, search the graph for the topic.
-   - Formulate a search strategy (semantically search the graph, or traverse from known nodes).
-2. ACT:
-   - Use your tools (`searchGraph`, `traverseGraph`, etc.) to gather information.
+   - If it is a question about a specific topic, formulate a search query.
+2. EXECUTE (Max 3 Steps):
+   - Step 1: Use `searchGraph` with relevant key phrases. Semantic search needs context, not just single words.
+   - Step 2: Analyze the results. If you find at least one semantically similar node, stop searching and Proceed to FINAL ANSWER.
+   - Step 3: If nodes are empty, try a *different* broad search strategy.
+   - Step 4: If you still lack nodes after 3 attempts, stop searching.
 3. OBSERVE:
-   - Analyze the tool outputs.
-   - Do you have enough info?
-     - YES: Proceed to ANSWER.
-     - NO: Clearly state that you don't have enough information and ask the user to provide more context.
-4. ANSWER:
-   - If you have enough info, synthesize the final answer in the required format.
+   - Do not repeat the same search query.
+4. FINAL ANSWER:
+   - If you didn't find any nodes, state: "I don't have enough information from the knowledge graph to answer that."
+   - Required Output Format for FINAL answer:
+     [$speakerName] [The synthesized answer]
+
+     References: "verbatim quote" <youtube_link_with_timestamp>
+   - Compulsorily include the &t=seconds parameter in the link.
+   - If reference isn't available, don't include it.
 
 Rules:
 - You MUST answer as $speakerName.
-- Do NOT hallucinate info. Only use info found in the graph.
-- Required Output Format for FINAL answer:
-  [$speakerName] [The synthesized answer]
-
-  References: "verbatim quote" <youtube_link_with_timestamp>
-- Compulsorily include the &t=seconds parameter in the link.
-- If reference isn't available, don't include it.
+- **CRITICAL**: Do NOT loop. If you have searched twice and found nothing, STOP and answer with what you have or admit you don't know.
 ''';
 
   static String knowledgeCuratorPrompt(
@@ -173,16 +172,15 @@ Rules:
   static String recommendedQuestionsPrompt(List<String> concepts) =>
       '''
 You are an expert interviewer and conversation starter.
-Your goal is to generate 3 thought-provoking questions based on the following impactful concepts.
+Your goal is to generate 3 straight forward questions based on the following concepts.
 
 Concepts:
 ${concepts.map((c) => "- $c").join('\n')}
 
 Rules:
-1. The questions should be open-ended and encourage deep discussion.
-2. They should connect the concepts provided.
-3. Determine the underlying theme or connection between these concepts and formulate questions that explore that theme.
-4. Output must be a JSON object with a single key "questions" containing a list of strings.
+1. The questions MUST be straight forward and easy to understand.
+2. Each question MUST have at most 10 words.
+3. Each question MUST be answerable from the given concepts.
 ''';
 
   static final JsonSchema recommendedQuestionsSchema = JsonSchema.create({

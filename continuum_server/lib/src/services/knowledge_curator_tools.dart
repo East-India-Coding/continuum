@@ -10,6 +10,7 @@ class KnowledgeCuratorTools {
   final int? podcastId;
   final String? videoId;
   final LLMService? llmService;
+  final bool isDemo;
 
   // Registry to hold embeddings temporarily so they don't need to be passed in prompts
   final Map<String, sp.Vector> _embeddingRegistry = {};
@@ -20,6 +21,7 @@ class KnowledgeCuratorTools {
     this.podcastId,
     this.videoId,
     this.llmService,
+    this.isDemo = false,
   });
 
   void registerEmbedding(String id, sp.Vector vector) {
@@ -41,7 +43,6 @@ class KnowledgeCuratorTools {
   List<Tool> get conversationTools => [
     _searchGraphTool,
     _traverseGraphTool,
-    _getSpeakerContextTool,
     _detectGapsTool,
   ];
 
@@ -308,14 +309,25 @@ class KnowledgeCuratorTools {
       final limit = (params['limit'] as int?) ?? 5;
 
       final embedding = await llmService!.generateEmbedding(query);
+      // use demoUserId if on the demo graph
+      final searchUserId = isDemo ? session.passwords['demoUserId'] : userId;
       final nodes = await GraphNode.db.find(
         session,
         where: (n) =>
-            n.userId.equals(userId) &
+            n.userId.equals(searchUserId) &
             (n.embedding.distanceCosine(embedding) < threshold),
         orderBy: (n) => n.embedding.distanceCosine(embedding),
         limit: limit,
       );
+      session.log('Found ${nodes.length} nodes for query: $query');
+
+      if (nodes.isEmpty) {
+        return {
+          'nodes': [],
+          'message':
+              'No nodes found with threshold $threshold. Try increasing the threshold (e.g. to 0.6) or changing the query.',
+        };
+      }
 
       return {
         'nodes': nodes
@@ -380,31 +392,6 @@ class KnowledgeCuratorTools {
         'connectedNodes': nodes
             .map((n) => {'id': n.id, 'label': n.label, 'summary': n.summary})
             .toList(),
-      };
-    },
-  );
-
-  Tool get _getSpeakerContextTool => Tool(
-    name: 'getSpeakerContext',
-    description: 'Retrieves metadata about a speaker.',
-    inputSchema: JsonSchema.create({
-      'type': 'object',
-      'properties': {
-        'speakerId': {'type': 'integer'},
-      },
-      'required': ['speakerId'],
-    }),
-    onCall: (dynamic arguments) async {
-      final params = arguments as Map<String, dynamic>;
-      final speakerId = params['speakerId'] as int;
-      final speaker = await Speaker.db.findById(session, speakerId);
-      if (speaker == null) return {'error': 'Speaker not found'};
-      return {
-        'speaker': {
-          'id': speaker.id,
-          'name': speaker.name,
-          'detectedCount': speaker.detectedCount,
-        },
       };
     },
   );

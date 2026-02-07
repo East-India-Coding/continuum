@@ -32,6 +32,7 @@ class ConversationEndpoint extends Endpoint {
       session,
       userId,
       llmService: llmService,
+      isDemo: isDemo,
     );
 
     final agent = llmService.createCuratorAgent(
@@ -111,7 +112,7 @@ class ConversationEndpoint extends Endpoint {
       // find 3 most impactful nodes from the user
       final nodes = await GraphNode.db.find(
         session,
-        where: (n) => n.userId.equals(userId) & n.primarySpeakerId.equals(speaker.id),
+        where: (n) => n.primarySpeakerId.equals(speaker.id),
         orderBy: (n) => n.impactScore,
         orderDescending: true,
         limit: 3,
