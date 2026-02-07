@@ -602,6 +602,41 @@ class _ConversationEndpoint {
       }
     });
   }
+
+  _i3.Future<List<String>> getRecommendedQuestions(
+    _i1.TestSessionBuilder sessionBuilder,
+    String topic,
+    _i6.Speaker speaker,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'conversation',
+            method: 'getRecommendedQuestions',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'conversation',
+          methodName: 'getRecommendedQuestions',
+          parameters: _i1.testObjectToJson({
+            'topic': topic,
+            'speaker': speaker,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _GraphEndpoint {

@@ -101,4 +101,28 @@ class LLMService {
       ),
     );
   }
+
+  Future<List<String>> getRecommendedQuestions(
+    Session session,
+    List<String> concepts,
+    String topic,
+  ) async {
+    try {
+      final prompt = LLMPrompts.recommendedQuestionsPrompt(concepts, topic);
+      final response = await _agent.sendFor<Map<String, dynamic>>(
+        prompt,
+        outputSchema: LLMPrompts.recommendedQuestionsSchema,
+        outputFromJson: (json) => json,
+      );
+
+      final questions = List<String>.from(response.output['questions']);
+      return questions;
+    } catch (e) {
+      session.log(
+        'LLMService: Error getting recommended questions: $e',
+        level: LogLevel.error,
+      );
+      return [];
+    }
+  }
 }

@@ -169,4 +169,35 @@ Rules:
 - Do not hallucinate the embedding.
 - Be critical. Do not create nodes for everything. Reject duplicates or low-value items.
 ''';
+
+  static String recommendedQuestionsPrompt(
+    List<String> concepts,
+    String topic,
+  ) =>
+      '''
+You are an expert interviewer and conversation starter.
+Your goal is to generate 3 thought-provoking questions based on the following impactful concepts related to "$topic".
+
+Concepts:
+${concepts.map((c) => "- $c").join('\n')}
+
+Rules:
+1. The questions should be open-ended and encourage deep discussion.
+2. They should connect the concepts provided.
+3. Determine the underlying theme or connection between these concepts and formulate questions that explore that theme.
+4. Output must be a JSON object with a single key "questions" containing a list of strings.
+''';
+
+  static final JsonSchema recommendedQuestionsSchema = JsonSchema.create({
+    'type': 'object',
+    'properties': {
+      'questions': {
+        'type': 'array',
+        'items': {'type': 'string'},
+        'minItems': 1,
+        'maxItems': 3,
+      },
+    },
+    'required': ['questions'],
+  });
 }

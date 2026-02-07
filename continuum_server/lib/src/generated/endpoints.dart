@@ -314,6 +314,31 @@ class Endpoints extends _i1.EndpointDispatch {
                     isDemo: params['isDemo'],
                   ),
         ),
+        'getRecommendedQuestions': _i1.MethodConnector(
+          name: 'getRecommendedQuestions',
+          params: {
+            'topic': _i1.ParameterDescription(
+              name: 'topic',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'speaker': _i1.ParameterDescription(
+              name: 'speaker',
+              type: _i1.getType<_i8.Speaker>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['conversation'] as _i5.ConversationEndpoint)
+                  .getRecommendedQuestions(
+                    session,
+                    params['topic'],
+                    params['speaker'],
+                  ),
+        ),
         'askQuestion': _i1.MethodStreamConnector(
           name: 'askQuestion',
           params: {

@@ -296,6 +296,18 @@ class EndpointConversation extends _i2.EndpointRef {
         'listSpeakers',
         {'isDemo': isDemo},
       );
+
+  _i3.Future<List<String>> getRecommendedQuestions(
+    String topic,
+    _i6.Speaker speaker,
+  ) => caller.callServerEndpoint<List<String>>(
+    'conversation',
+    'getRecommendedQuestions',
+    {
+      'topic': topic,
+      'speaker': speaker,
+    },
+  );
 }
 
 /// {@category Endpoint}

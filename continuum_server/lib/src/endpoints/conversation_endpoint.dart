@@ -93,4 +93,46 @@ class ConversationEndpoint extends Endpoint {
     );
     return speakers;
   }
+
+  Future<List<String>> getRecommendedQuestions(
+    Session session,
+    String topic,
+    Speaker speaker,
+  ) async {
+    try {
+      final userId = session.authenticated?.userIdentifier;
+      if (userId == null) {
+        session.log(
+          'getRecommendedQuestions: User not authenticated',
+          level: LogLevel.warning,
+        );
+        throw Exception('User not authenticated');
+      }
+
+      // find 3 most impactful nodes from the user
+      final nodes = await GraphNode.db.find(
+        session,
+        where: (n) => n.userId.equals(userId),
+        orderBy: (n) => n.impactScore,
+        orderDescending: true,
+        limit: 3,
+      );
+
+      if (nodes.isEmpty) {
+        return [];
+      }
+
+      final llmService = LLMService();
+
+      final concepts = nodes.map((n) => '${n.label}: ${n.summary}').toList();
+
+      return llmService.getRecommendedQuestions(session, concepts, topic);
+    } catch (e) {
+      session.log(
+        'Error in getRecommendedQuestions: $e',
+        level: LogLevel.error,
+      );
+      return [];
+    }
+  }
 }

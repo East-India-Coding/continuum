@@ -19,7 +19,9 @@ void run(List<String> args) async {
       JwtConfigFromPasswords(),
     ],
     identityProviderBuilders: [
-      EmailIdpConfigFromPasswords(),
+      EmailIdpConfigFromPasswords(
+        sendRegistrationVerificationCode: _sendRegistrationCode,
+      ),
       GoogleIdpConfigFromPasswords(),
     ],
   );
@@ -68,4 +70,14 @@ void run(List<String> args) async {
 
   // Start the server.
   await pod.start();
+}
+
+void _sendRegistrationCode(
+  Session session, {
+  required String email,
+  required UuidValue accountRequestId,
+  required String verificationCode,
+  required Transaction? transaction,
+}) {
+  session.log('[EmailIDP] Registration code ($email): $verificationCode');
 }
