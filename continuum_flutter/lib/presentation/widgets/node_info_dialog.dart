@@ -11,12 +11,14 @@ import 'package:url_launcher/url_launcher.dart';
 class NodeInfoDialog extends ConsumerStatefulWidget {
   const NodeInfoDialog({
     required this.node,
+    this.isDemo = false,
     this.speakerName,
     super.key,
   });
 
   final GraphNodeDisplay node;
   final String? speakerName;
+  final bool isDemo;
 
   @override
   ConsumerState<NodeInfoDialog> createState() => _NodeInfoDialogState();
@@ -47,6 +49,12 @@ class _NodeInfoDialogState extends ConsumerState<NodeInfoDialog> {
           const SnackBar(content: Text('Please log in to bookmark nodes')),
         );
         throw Exception('Not logged in');
+      }
+      if (widget.isDemo) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cannot bookmark nodes in demo graph')),
+        );
+        throw Exception('Cannot bookmark nodes in demo graph');
       }
 
       await ref

@@ -9,14 +9,14 @@ class CyberpunkButton extends ConsumerStatefulWidget {
   const CyberpunkButton({
     required this.onPressed,
     required this.text,
-    required this.icon,
+    this.icon,
     this.isPrimary = true,
     super.key,
   });
 
   final VoidCallback? onPressed;
   final String text;
-  final IconData icon;
+  final IconData? icon;
   final bool isPrimary;
 
   @override
@@ -107,12 +107,14 @@ class _CyberpunkButtonState extends ConsumerState<CyberpunkButton> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                widget.icon,
-                color: getTextColor(),
-                size: 20,
-              ),
-              const SizedBox(width: 12),
+              if (widget.icon != null) ...[
+                Icon(
+                  widget.icon,
+                  color: getTextColor(),
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+              ],
               Flexible(
                 child: AutoSizeText(
                   widget.text,

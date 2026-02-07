@@ -12,6 +12,10 @@ class ConversationService {
     return _client.conversation.listSpeakers(isDemo: isDemo);
   }
 
+  Future<List<String>> getRecommendedQuestions(Speaker speaker) {
+    return _client.conversation.getRecommendedQuestions(speaker);
+  }
+
   Stream<AgentResponse> askQuestion(
     String text,
     Speaker speaker, {
@@ -25,4 +29,11 @@ class ConversationService {
 ConversationService conversationService(Ref ref) {
   final client = ref.watch(serverpodClientProvider);
   return ConversationService(client);
+}
+
+@riverpod
+Future<List<String>> recommendedQuestions(Ref ref, Speaker speaker) async {
+  return ref
+      .watch(conversationServiceProvider)
+      .getRecommendedQuestions(speaker);
 }

@@ -7,9 +7,11 @@ import 'package:continuum_flutter/constants.dart';
 import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:continuum_flutter/presentation/utils/url_launcher.dart';
 import 'package:continuum_flutter/presentation/widgets/animated_background.dart';
+import 'package:continuum_flutter/presentation/widgets/continuum_dialog.dart';
 import 'package:continuum_flutter/presentation/widgets/continuum_header.dart';
 import 'package:continuum_flutter/presentation/widgets/cyberpunk_button.dart';
 import 'package:continuum_flutter/presentation/widgets/hover_link_text.dart';
+import 'package:continuum_flutter/presentation/widgets/test_user_sign_in_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,8 +27,6 @@ class SignInPage extends ConsumerStatefulWidget {
 }
 
 class _SignInPageState extends ConsumerState<SignInPage> {
-  bool _isLoggingIn = false;
-
   @override
   Widget build(BuildContext context) {
     final client = ref.watch(serverpodClientProvider);
@@ -197,47 +197,32 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                GoogleSignInWidget(
-                  client: client,
-                  // need to pass empty scopes to avoid double popup issue
-                  scopes: const [],
-                  buttonWrapper:
-                      ({
-                        required child,
-                        required onPressed,
-                        required style,
-                      }) => Stack(
-                        children: [
-                          if (!_isLoggingIn)
-                            Opacity(
-                              opacity: 0.01,
-                              child: child,
-                            ),
-                          CyberpunkButton(
-                            onPressed: _isLoggingIn
-                                ? null
-                                : () {
-                                    setState(() {
-                                      _isLoggingIn = true;
-                                    });
-                                    onPressed?.call();
-                                  },
-                            text: _isLoggingIn
-                                ? 'CONNECTING...'
-                                : 'LOGIN WITH GOOGLE',
-                            icon: Icons.g_mobiledata,
-                          ),
-                        ],
+                CyberpunkButton(
+                  onPressed: () {
+                    // open dialog
+                    showDialog<void>(
+                      context: context,
+                      builder: (context) => ContinuumDialog(
+                        title: 'SIGN IN AS TEST USER',
+                        child: TestUserSignInWidget(
+                          client: client,
+                          onError: (error) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(error.toString()),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          },
+                          onAuthenticated: () {
+                            Navigator.pop(context);
+                          },
+                        ),
                       ),
-                  onError: (error) {
-                    setState(() {
-                      _isLoggingIn = false;
-                    });
-                    debugPrint(error.toString());
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $error')),
                     );
                   },
+                  text: 'TEST USER SIGN IN',
+                  icon: Icons.graphic_eq_sharp,
                 ),
                 const SizedBox(height: 30),
                 Row(

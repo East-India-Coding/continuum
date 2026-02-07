@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:continuum_client/continuum_client.dart';
+import 'package:continuum_flutter/application/auth_service.dart';
+import 'package:continuum_flutter/application/conversation_service.dart';
 import 'package:continuum_flutter/presentation/controllers/conversation_controller.dart';
 import 'package:continuum_flutter/presentation/utils/continuum_colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,7 +24,8 @@ class ChatPanel extends ConsumerStatefulWidget {
   ConsumerState<ChatPanel> createState() => _ChatPanelState();
 }
 
-class _ChatPanelState extends ConsumerState<ChatPanel> {
+class _ChatPanelState extends ConsumerState<ChatPanel>
+    with AutomaticKeepAliveClientMixin<ChatPanel> {
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -48,6 +51,13 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
   }
 
   void _sendMessage() {
+    if (!ref.read(authServiceProvider).isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to continue')),
+      );
+      return;
+    }
+
     final text = _chatController.text.trim();
     if (text.isNotEmpty) {
       ref
@@ -143,6 +153,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final conversationState = ref.watch(
       conversationControllerProvider(widget.speakers),
     );
@@ -334,205 +345,210 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
     return Expanded(
       child: Column(
         children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: state.messages.length + (state.isStreaming ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == state.messages.length && state.isStreaming) {
-                  return const SizedBox.shrink();
-                }
+          if (state.messages.isEmpty)
+            Expanded(child: _recommendedQuestionsWidget(state.selectedSpeaker))
+          else
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: state.messages.length + (state.isStreaming ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == state.messages.length && state.isStreaming) {
+                    return const SizedBox.shrink();
+                  }
 
-                // Safety check
-                if (index >= state.messages.length) {
-                  return const SizedBox.shrink();
-                }
+                  // Safety check
+                  if (index >= state.messages.length) {
+                    return const SizedBox.shrink();
+                  }
 
-                final msg = state.messages[index];
-                final isBot = !msg.isUser;
+                  final msg = state.messages[index];
+                  final isBot = !msg.isUser;
 
-                if (isBot) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: ContinuumColors.accent),
-                            color: ContinuumColors.accent.withValues(
-                              alpha: 0.1,
-                            ),
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.api,
-                              color: ContinuumColors.accent,
-                              size: 14,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const AutoSizeText(
-                                'ORACLE_CORE',
-                                maxLines: 1,
-                                style: TextStyle(
-                                  color: ContinuumColors.accent,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1,
-                                ),
+                  if (isBot) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: ContinuumColors.accent),
+                              color: ContinuumColors.accent.withValues(
+                                alpha: 0.1,
                               ),
-                              const SizedBox(height: 4),
-                              if (msg.thinking != null && state.isStreaming)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 200),
-                                    transitionBuilder: (child, animation) {
-                                      return FadeTransition(
-                                        opacity: animation,
-                                        child: child,
-                                      );
-                                    },
-                                    child: AutoSizeText(
-                                      msg.thinking!.length > 150
-                                          ? msg.thinking!.substring(
-                                              msg.thinking!.length - 150,
-                                            )
-                                          : msg.thinking!,
-                                      key: ValueKey(msg.thinking!.length),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.rajdhani(
-                                        color: ContinuumColors.textGrey,
-                                        fontSize: 13,
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.api,
+                                color: ContinuumColors.accent,
+                                size: 14,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const AutoSizeText(
+                                  'ORACLE_CORE',
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    color: ContinuumColors.accent,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                if (msg.thinking != null && state.isStreaming)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      transitionBuilder: (child, animation) {
+                                        return FadeTransition(
+                                          opacity: animation,
+                                          child: child,
+                                        );
+                                      },
+                                      child: AutoSizeText(
+                                        msg.thinking!.length > 150
+                                            ? msg.thinking!.substring(
+                                                msg.thinking!.length - 150,
+                                              )
+                                            : msg.thinking!,
+                                        key: ValueKey(msg.thinking!.length),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.rajdhani(
+                                          color: ContinuumColors.textGrey,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              Container(
-                                decoration: const BoxDecoration(
-                                  border: Border(
-                                    left: BorderSide(
-                                      color: ContinuumColors.accent,
-                                      width: 2,
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      left: BorderSide(
+                                        color: ContinuumColors.accent,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    color: Color(
+                                      0xFF1E1E1E,
                                     ),
                                   ),
-                                  color: Color(
-                                    0xFF1E1E1E,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
                                   ),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    minWidth: 30,
-                                  ),
-                                  child: msg.result == '...'
-                                      ? SizedBox(
-                                          width: 30,
-                                          height: 16,
-                                          child: JumpingDots(
-                                            color: ContinuumColors.accent,
-                                            radius: 4,
-                                            verticalOffset: -5,
-                                            animationDuration: const Duration(
-                                              milliseconds: 500,
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      minWidth: 30,
+                                    ),
+                                    child: msg.result == '...'
+                                        ? SizedBox(
+                                            width: 30,
+                                            height: 16,
+                                            child: JumpingDots(
+                                              color: ContinuumColors.accent,
+                                              radius: 4,
+                                              verticalOffset: -5,
+                                              animationDuration: const Duration(
+                                                milliseconds: 500,
+                                              ),
+                                            ),
+                                          )
+                                        : RichText(
+                                            text: _buildRichTextSpan(
+                                              msg.result.trim(),
                                             ),
                                           ),
-                                        )
-                                      : RichText(
-                                          text: _buildRichTextSpan(
-                                            msg.result.trim(),
-                                          ),
-                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(
+                              right: 36,
+                            ),
+                            child: AutoSizeText(
+                              'OPERATOR_01',
+                              maxLines: 1,
+                              style: TextStyle(
+                                color: ContinuumColors.textGrey,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                child: Container(
+                                  color: const Color(0xFF252525),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  child: Text(
+                                    msg.result,
+                                    style: GoogleFonts.rajdhani(
+                                      color: ContinuumColors.textGrey,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: ContinuumColors.textGrey,
+                                  ),
+                                  color: Colors.transparent,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.fingerprint,
+                                    color: ContinuumColors.textGrey,
+                                    size: 14,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(
-                            right: 36,
-                          ),
-                          child: AutoSizeText(
-                            'OPERATOR_01',
-                            maxLines: 1,
-                            style: TextStyle(
-                              color: ContinuumColors.textGrey,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              child: Container(
-                                color: const Color(0xFF252525),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                child: Text(
-                                  msg.result,
-                                  style: GoogleFonts.rajdhani(
-                                    color: ContinuumColors.textGrey,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: ContinuumColors.textGrey,
-                                ),
-                                color: Colors.transparent,
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.fingerprint,
-                                  color: ContinuumColors.textGrey,
-                                  size: 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              },
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
-          ),
           if (state.isStreaming)
             const Padding(
               padding: EdgeInsets.only(left: 16, bottom: 8),
@@ -617,4 +633,63 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
       ),
     );
   }
+
+  Widget _recommendedQuestionsWidget(Speaker? selectedSpeaker) {
+    if (selectedSpeaker == null) {
+      return const SizedBox.shrink();
+    }
+
+    final questionsValue = ref.watch(
+      recommendedQuestionsProvider(selectedSpeaker),
+    );
+    return questionsValue.when(
+      data: (questions) {
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: questions.length,
+          itemBuilder: (context, index) {
+            final question = questions[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: GestureDetector(
+                onTap: () {
+                  ref
+                      .read(
+                        conversationControllerProvider(
+                          widget.speakers,
+                        ).notifier,
+                      )
+                      .sendMessage(question);
+                },
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: ContinuumColors.accent),
+                      color: Colors.transparent,
+                    ),
+                    child: Text(
+                      question,
+                      style: const TextStyle(
+                        color: ContinuumColors.accent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+      error: (error, stack) => const SizedBox.shrink(),
+      loading: () => const Center(
+        child: CupertinoActivityIndicator(),
+      ),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

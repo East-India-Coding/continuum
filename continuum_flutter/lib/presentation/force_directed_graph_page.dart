@@ -230,6 +230,7 @@ class _ForceDirectedGraphPageState
 
                         return NodeInfoDialog(
                           node: node,
+                          isDemo: widget.isDemo,
                           speakerName: graphState.speakers
                               .where(
                                 (speaker) =>
