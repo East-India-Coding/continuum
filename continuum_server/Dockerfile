@@ -13,7 +13,7 @@ FROM alpine:latest
 # Environment variables
 ENV runmode=production
 ENV serverid=default
-ENV logging=normal
+ENV logging=verbose
 ENV role=monolith
 
 # Copy runtime dependencies
