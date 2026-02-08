@@ -1,42 +1,42 @@
-# Build stage
-FROM dart:3.10.0 AS build
+FROM dart:stable AS build
+
 WORKDIR /app
 COPY . .
 
-# Install dependencies and compile the server executable
 RUN dart pub get
-RUN dart compile exe bin/main.dart -o bin/server
+RUN dart compile exe bin/main.dart -o bin/main
 
-# Final stage
-FROM alpine:latest
+FROM jenkins/jenkins:lts
+USER root
+RUN apt-get update &&
+apt-get -y install apt-transport-https
+ca-certificates curl gnupg2
+software-properties-common &&
+curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && >
+add-apt-repository
+"deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")
+$(lsb_release -cs)
+stable" &&
+apt-get update &&
+apt-get -y install docker-ce
+USER jenkins
 
-# Environment variables
-ENV runmode=production
+ENV runmode=development
 ENV serverid=default
-ENV logging=verbose
+ENV logging=normal
 ENV role=monolith
 
-# Copy runtime dependencies
 COPY --from=build /runtime/etc /etc
 COPY --from=build /runtime/lib /lib
 COPY --from=build /runtime/lib64 /lib64
 COPY --from=build /runtime/usr /usr
-
-# Copy compiled server executable
-COPY --from=build /app/bin/server server
-
-# Copy configuration files and resources
+COPY --from=build /app/bin/main /app/bin/main
 COPY --from=build /app/config/ config/
+COPY --from=build /app/generated/ generated/
 COPY --from=build /app/web/ web/
-COPY --from=build /app/migrations/ migrations/
 
-# This file is required to enable the endpoint log filter in Insights.
-COPY --from=build /app/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
-
-# Expose ports
 EXPOSE 8080
 EXPOSE 8081
 EXPOSE 8082
 
-# Define the entrypoint command
-ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role
+CMD app/bin/main --mode $runmode --server-id $serverid --logging $logging --role $role
