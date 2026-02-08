@@ -30,12 +30,12 @@ webServer:
 # If you are connecting on a public IP (e.g. on AWS or Google Cloud Run), you
 # connect on the public IP of the database e.g. database.continuum-agent.online.
 database:
-  host: database.private-production.continuum-agent.online/.s.PGSQL.5432
+  host: database.private-production.continuum-agent.online
   port: 5432
   name: serverpod
   user: postgres
   requireSsl: true
-  isUnixSocket: true # defaults to false
+  #isUnixSocket: true # defaults to false
   #maxConnectionCount: 10 # Defaults to 10, a negative or null value removes the limit
 
 # This is the setup for Redis. The default for the Google Cloud Engine Terraform
