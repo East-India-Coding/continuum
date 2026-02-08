@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:continuum_client/continuum_client.dart';
+import 'package:continuum_flutter/application/audio_service.dart';
 import 'package:continuum_flutter/application/auth_service.dart';
 import 'package:continuum_flutter/application/conversation_service.dart';
 import 'package:continuum_flutter/presentation/controllers/conversation_controller.dart';
@@ -605,7 +606,12 @@ class _ChatPanelState extends ConsumerState<ChatPanel>
                   InkWell(
                     onTap: state.isStreaming || state.selectedSpeaker == null
                         ? null
-                        : _sendMessage,
+                        : () {
+                            _sendMessage();
+                            ref
+                                .read(audioServiceProvider.notifier)
+                                .playClickSound();
+                          },
                     child: Container(
                       width: 48,
                       height: 48,
@@ -655,6 +661,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel>
                 onTap: () {
                   _chatController.text = question;
                   _sendMessage();
+                  ref.read(audioServiceProvider.notifier).playClickSound();
                 },
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,

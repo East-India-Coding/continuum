@@ -149,24 +149,28 @@ New Topic Data:
 Embedding ID: $embeddingId
 
 Protocol:
-1. OBSERVE: Call `searchSimilarNodes` using the provided Embedding ID ("$embeddingId").
+1. OBSERVE: Call `searchSimilarNodes` EXACTLY ONCE using the provided Embedding ID ("$embeddingId").
 2. REASON: 
-   - Is this topic a duplicate of an existing node? (Distance < 0.1 or very similar content) -> If yes, REJECT or just link.
+   - Is this topic a duplicate of an existing node? (Distance < 0.1 or very similar content) -> If yes, REJECT.
    - Is it improved/related? -> Create node and link.
    - Is it redundant or low value? -> REJECT (Action: None).
-   - "This idea adds no structural value" or "This reinforces an existing cluster but doesn’t deserve a node".
 3. ACT:
+   - Identify the speaker: Call `checkSpeakerIdentity(name: "$primarySpeaker")` EXACTLY ONCE.
    - To create a node: Call `createGraphNode`. Include the Embedding ID ("$embeddingId").
    - To link nodes: Call `createGraphEdge`.
-   - To check speaker: Call `checkSpeakerIdentity(name: "$primarySpeaker")` first to get the correct speakerId.
    - To REJECT: Output a thought explaining why, and do not call createGraphNode.
+4. TERMINATE:
+   - Once you have performed the necessary actions (or decided to reject), STOP. 
+   - Do NOT search again.
 
 Rules:
-- You MUST check the speaker identity before creating a node to get the valid speakerId.
+- You MUST check the speaker identity before creating a node.
 - Use the EXACT Embedding ID provided when creating a node.
 - If you create a node, create logical edges to similar nodes you found.
 - Do not hallucinate the embedding.
 - Be critical. Do not create nodes for everything. Reject duplicates or low-value items.
+- **CRITICAL**: Do NOT repeat steps. Max 1 search, Max 1 speaker check.
+- **CRITICAL**: Make a decision and act. Do not stall.
 ''';
 
   static String recommendedQuestionsPrompt(List<String> concepts) =>
