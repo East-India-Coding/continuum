@@ -6,6 +6,8 @@ set -e
 # Build the web app.
 
 cd continuum_flutter
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
 flutter build web --base-href /app/ --wasm
 rm -rf ../continuum_server/web/app
 mv build/web/ ../continuum_server/web/app
