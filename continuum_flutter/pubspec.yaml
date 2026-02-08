@@ -2,7 +2,7 @@ name: continuum_flutter
 version: 1.0.0+1
 publish_to: none
 environment:
-  sdk: ^3.8.0
+  sdk: ^3.10.0
   flutter: ^3.32.0
 description: A new Flutter project with Serverpod.
 
