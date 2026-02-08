@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:live_indicator/live_indicator.dart';
+import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
@@ -203,20 +204,23 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       context: context,
                       builder: (context) => ContinuumDialog(
                         title: 'SIGN IN AS TEST USER',
-                        child: TestUserSignInWidget(
+                        child: EmailSignInWidget(
                           client: client,
-                          onError: (error) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(error.toString()),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          },
-                          onAuthenticated: () {
-                            Navigator.pop(context);
-                          },
-                        ),
+                        ) 
+                        // TestUserSignInWidget(
+                        //   client: client,
+                        //   onError: (error) {
+                        //     ScaffoldMessenger.of(context).showSnackBar(
+                        //       SnackBar(
+                        //         content: Text(error.toString()),
+                        //         backgroundColor: Colors.red,
+                        //       ),
+                        //     );
+                        //   },
+                        //   onAuthenticated: () {
+                        //     Navigator.pop(context);
+                        //   },
+                        // ),
                       ),
                     );
                   },
