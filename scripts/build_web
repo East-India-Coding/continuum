@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Makes sure we break the script on any error.
+set -e
+
+# Build the web app.
+
+cd continuum_flutter
+flutter build web --base-href /app/ --wasm
+rm -rf ../continuum_server/web/app
+mv build/web/ ../continuum_server/web/app
