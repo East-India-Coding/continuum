@@ -76,8 +76,7 @@ Instead of top-k retrieval:
 ### 🧬 System Architecture
 
 #### High-Level Flow
-```mermaid
-graph TD
+```
     A[User Input (YouTube URL)] --> B[Background Ingestion Agent (Gemini 3)]
     B --> C[Semantic Idea Extraction]
     C --> D[Embedding Generation]
@@ -184,7 +183,7 @@ It demonstrates how Gemini 3 enables:
 -   **Multimodal reasoning**
 -   **Structured knowledge evolution**
 
-> This is not a chatbot. **It’s a thinking system.**
+> **It’s a thinking system, not another chatbot**
 
 ---
 
