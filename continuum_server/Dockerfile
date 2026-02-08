@@ -13,11 +13,14 @@ FROM alpine:latest
 # Environment variables
 ENV runmode=production
 ENV serverid=default
-ENV logging=normal
+ENV logging=verbose
 ENV role=monolith
 
 # Copy runtime dependencies
-COPY --from=build /runtime/ /
+COPY --from=build /runtime/etc /etc
+COPY --from=build /runtime/lib /lib
+COPY --from=build /runtime/lib64 /lib64
+COPY --from=build /runtime/usr /usr
 
 # Copy compiled server executable
 COPY --from=build /app/bin/server server
