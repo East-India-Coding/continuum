@@ -149,13 +149,13 @@ New Topic Data:
 Embedding ID: $embeddingId
 
 Protocol:
-1. OBSERVE: Call `searchSimilarNodes` EXACTLY ONCE using the provided Embedding ID ("$embeddingId").
+1. OBSERVE: Call `searchSimilarNodes` exactly ONCE using the provided Embedding ID ("$embeddingId").
 2. REASON: 
    - Is this topic a duplicate of an existing node? (Distance < 0.1 or very similar content) -> If yes, REJECT.
    - Is it improved/related? -> Create node and link.
    - Is it redundant or low value? -> REJECT (Action: None).
 3. ACT:
-   - Identify the speaker: Call `checkSpeakerIdentity(name: "$primarySpeaker")` EXACTLY ONCE.
+   - Identify the speaker: Call `checkSpeakerIdentity(name: "$primarySpeaker")` exactly ONCE.
    - To create a node: Call `createGraphNode`. Include the Embedding ID ("$embeddingId").
    - To link nodes: Call `createGraphEdge`.
    - To REJECT: Output a thought explaining why, and do not call createGraphNode.
