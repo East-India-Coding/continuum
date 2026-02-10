@@ -13,11 +13,20 @@ We wanted to build something that reflects how humans actually learn: by connect
 3.  **Visual Exploration**: On the frontend, you get an interactive **Force-Directed Graph**. You can see how "Neuroscience" from Huberman connects to "AI Alignment" from Hinton. You can toggle granularity to see the big picture or dive into the weeds.
 4.  **Grounded Chat**: You can ask questions like *"What do a certain speaker think about the future of AGI?"*. The agent plans a path through the graph, gathers evidence, and constructs an answer with **timestamped citations** that jump directly to the exact second in the video.
 
+
+## How Continuum leverages Gemini 3.0
+We utilized Gemini 3.0 Pro to build a truly autonomous knowledge curator. Here is how we used its specific features:
+
+*   **Multimodal Reasoning**: We pass the raw caption files as `application/json` attachments directly to Gemini's multimodal interface. This allows the model to "see" the time-structure of the video, enabling it to extract **exact second-level timestamps** for every citation.
+*   **Semantic Embeddings & Link Processing**: We use `gemini-embedding-001` to vectorize every atomic idea. The agent uses these embeddings to perform semantic searches across the graph, autonomously identifying and creating **meaningful links** between concepts discussed in completely different videos.
+*   **Agentic Speaker Diarization**: Leveraging the massive token context window, Gemini processes the entire video with transcript at once. It infers speaker identities from context and correctly attributes quotes throughout the episode, solving a problem that usually requires specialized audio models.
+*   **Multi-Step Orchestration with Tools**: We provide tools to the agent to interact with the knowledge graph. The agent autonomously decides when to use these tools to answer the user's question or generate/link new nodes. It uses Gemini's **thought signatures** behind the scenes to maintain its train of thought. We enable `enableThinking: true` to give our Knowledge Curator a "Stream of Consciousness". You can see it in action as it decides: *"I found a node for 'Dopamine', but this video discusses it in the context of 'Addiction'. I should check if a link exists before creating a new node."*
+
 ## How we built it
 Continuum is a full-stack Dart application, leveraging the power of **Serverpod** for a seamless end-to-end type-safe experience.
 
 *   **The Brain (AI & Logic)**:
-    *   We used **Gemini 3.0 Pro** for its massive context window and superior reasoning capabilities.
+    *   We used **Gemini 3.0 Pro** for its massive context window and reasoning capabilities.
     *   We implemented a **Cognitive Architecture** (Plan-Observe-Act loop) rather than a simple prompt chain. The agent has tools like `searchSimilarNodes`, `createGraphNode`, and `checkSpeakerIdentity`.
     *   **PostgreSQL + pgvector** handles the storage and semantic similarity search.
 

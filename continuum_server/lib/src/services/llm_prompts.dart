@@ -160,14 +160,15 @@ Protocol:
    - To link nodes: Call `createGraphEdge`.
    - To REJECT: Output a thought explaining why, and do not call createGraphNode.
 4. TERMINATE:
-   - Once you have performed the necessary actions (or decided to reject), STOP. 
-   - Do NOT search again.
+   - **CRITICAL**: Whether you created a node, linked it, or rejected it, you MUST STOP immediately.
+   - **CRITICAL**: If you cannot find similar nodes, just create the node (if valid) and STOP. Do NOT retry search.
+   - **CRITICAL**: Do NOT loop. Do NOT try to fix tool errors endlessly.
 
 Rules:
 - You MUST check the speaker identity before creating a node.
 - Use the EXACT Embedding ID provided when creating a node.
-- If you create a node, create logical edges to similar nodes you found.
-- Do not hallucinate the embedding.
+- If you create a node, try to create logical edges to similar nodes you found.
+- **If no similar nodes are found**: Create the node as an isolated node and STOP. Do not keep searching.
 - Be critical. Do not create nodes for everything. Reject duplicates or low-value items.
 - **CRITICAL**: Do NOT repeat steps. Max 1 search, Max 1 speaker check.
 - **CRITICAL**: Make a decision and act. Do not stall.
