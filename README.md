@@ -17,6 +17,7 @@ Existing solutions fail because they are:
 Scrubbing through videos or asking a chatbot repeatedly is not how humans think. We build webs of knowledge.
 
 ---
+<img width="1919" height="871" alt="Screenshot 2026-02-09 020346" src="https://github.com/user-attachments/assets/e7fc156a-bec6-495e-843c-77d690ba949f" />
 
 ### 💡 The Solution
 
@@ -31,6 +32,7 @@ Each idea becomes:
 Knowledge compounds instead of disappearing.
 
 ---
+<img width="1919" height="870" alt="Screenshot 2026-02-09 014545" src="https://github.com/user-attachments/assets/5f08c8a8-d48b-4cfd-a5be-53673d5848e9" />
 
 ### 🎯 What Continuum Does
 
